@@ -1,0 +1,34 @@
+struct BarrierData {
+  uint16 context;
+  string name;
+  uint32 avIds[];
+};
+
+// The most fundamental class
+dclass DistributedObject {
+  // These are used to support DistributedObjectAI.beginBarrier() and
+  // the matching DistributedObject.doneBarrier().  If you don't call
+  // these functions, you don't care about these distributed methods.
+  // (Actually, you probably don't care anyway.)
+  setBarrierData(BarrierData data[]) broadcast ram;
+  setBarrierReady(uint16 context) airecv clsend;
+  execCommand(string, uint32 mwMgrId, uint32 avId, uint32 zoneId);
+  // this is to allow the client to force a disconnect from the server
+  broadcastMessage() broadcast;
+};
+
+dclass DistributedNode3D : DistributedObject {
+  setX(int16/10) broadcast ram ownsend airecv;
+  setY(int16/10) broadcast ram ownsend airecv;
+  setZ(int16/10) broadcast ram ownsend airecv;
+  setH(int16%360/10) broadcast ram ownsend airecv;
+  setP(int16%360/10) broadcast ram ownsend airecv;
+  setR(int16%360/10) broadcast ram ownsend airecv;
+  setPos : setX, setY, setZ;
+  setHpr : setH, setP, setR;
+  setPosHpr : setX, setY, setZ, setH, setP, setR;
+  setXY : setX, setY;
+  setXZ : setX, setZ;
+  setXYH : setX, setY, setH;
+  setXYZH : setX, setY, setZ, setH;
+};

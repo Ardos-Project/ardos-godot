@@ -1,3 +1,6 @@
+# DC Parser addon
+addons/gddcparser/*
+
 # Godot 4+ specific ignores
 .godot/
 
