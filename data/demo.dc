@@ -1,3 +1,6 @@
+from scripts.characters import PlayerCharacters/AI/UD
+from world import World/AI
+
 struct BarrierData {
   uint16 context;
   string name;
