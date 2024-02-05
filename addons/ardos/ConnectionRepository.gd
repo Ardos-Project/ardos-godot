@@ -24,6 +24,11 @@ var dc_hash_val : int :
 ## The ServerRepository will redefine this to 'AI'.
 var dc_suffix: String = ""
 
+## Whether we're supporting 'owner' views of distributed objects
+## (i.e. 'receives ownrecv', 'I own this object and have a separate
+## view of it regardless of where it currently is located')
+var owner_views: bool = false
+
 
 var _socket: StreamPeerTCP = StreamPeerTCP.new()
 var _last_status: StreamPeerTCP.Status = StreamPeerTCP.STATUS_NONE
@@ -119,11 +124,74 @@ func read_dc_file(file_names: PackedStringArray = []) -> void:
 			import_symbols.append(symbol_name)
 			
 		_import_module(module_name, import_symbols)
+	
+	# Now get the class definition for the classes named in the DC file.
+	for i in range(_dc_file.get_num_classes()):
+		var dclass = _dc_file.get_dc_class(i)
+		var number = dclass.get_number()
+		var cls_name = dclass.get_name() + dc_suffix
 		
+		# Does the class have a definition defined in dc imports?
+		var has_cls: bool = _dc_imports.has(cls_name)
+		if not has_cls and dc_suffix == "UD":
+			cls_name = dclass.get_name() + "AI"
+			has_cls = _dc_imports.has(cls_name)
+			
+		# Also try it whithout the suffix.
+		if not has_cls:
+			cls_name = dclass.get_name()
+			has_cls = _dc_imports.has(cls_name)
+			
+		if not has_cls:
+			# N.B: This is not an error.
+			# TODO: Change this to a debug print.
+			print("No class definition for %s." % cls_name)
+		
+		_dclasses_by_name[cls_name] = dclass
+		if number >= 0:
+			_dclasses_by_number[number] = dclass
+			
+	# Owner views.
+	if owner_views:
+		var owner_dc_suffix = dc_suffix + "OV"
+		# dict of class names (without 'OV') that have owner views.
+		var owner_import_symbols: Dictionary = {}
+		
+		# Now import all of the modules required by the DC file.
+		for n in range(_dc_file.get_num_import_modules()):
+			# Get the module name: E.g. scripts.characters
+			var module_name: String = _dc_file.get_import_module(n)
+			# Convert the module name into a resource path.
+			module_name = module_name.replace(".", "/")
+			
+			var import_symbols: PackedStringArray = []
+			for i in range(_dc_file.get_num_import_symbols(n)):
+				var symbol_name: String = _dc_file.get_import_symbol(n, i)
+				var suffixes: PackedStringArray = symbol_name.split("/")
+				
+				symbol_name = suffixes[0]
+				suffixes = suffixes.slice(1, suffixes.size())
+				
+				if suffixes.has(owner_dc_suffix):
+					symbol_name += dc_suffix
+
+				import_symbols.append(symbol_name)
+				owner_import_symbols[symbol_name] = null
+				
+			_import_module(module_name, import_symbols)
+			
+		# Now get the class definition for the owner classes named
+		# in the DC file.
 		for i in range(_dc_file.get_num_classes()):
 			var dclass = _dc_file.get_dc_class(i)
-			var number = dclass.get_number()
-			# TODO.
+			if owner_import_symbols.has(dclass.get_name() + owner_dc_suffix):
+				var number = dclass.get_number()
+				var cls_name = dclass.get_name() + owner_dc_suffix
+				
+				# Does the class have a definition defined in dc imports?
+				assert(_dc_imports.has(cls_name), "")
+				
+				_dclasses_by_name[cls_name] = dclass
 			
 ##
 func _import_module(module_name: String, import_symbols: PackedStringArray):

@@ -1,23 +1,7 @@
-from scripts.characters import PlayerCharacters/AI/UD
-from world import World/AI
-
-struct BarrierData {
-  uint16 context;
-  string name;
-  uint32 avIds[];
-};
+from addons.ardos import DistributedObject/AI/UD
 
 // The most fundamental class
 dclass DistributedObject {
-  // These are used to support DistributedObjectAI.beginBarrier() and
-  // the matching DistributedObject.doneBarrier().  If you don't call
-  // these functions, you don't care about these distributed methods.
-  // (Actually, you probably don't care anyway.)
-  setBarrierData(BarrierData data[]) broadcast ram;
-  setBarrierReady(uint16 context) airecv clsend;
-  execCommand(string, uint32 mwMgrId, uint32 avId, uint32 zoneId);
-  // this is to allow the client to force a disconnect from the server
-  broadcastMessage() broadcast;
 };
 
 dclass DistributedNode3D : DistributedObject {
