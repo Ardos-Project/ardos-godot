@@ -34,6 +34,16 @@ func _handle_connected():
 	_dg.add_uint32(self.dc_hash_val)
 	_dg.add_string(self._version)
 	self.send(_dg)
+	
+func _handle_disconnected():
+	print("Disconnected from Ardos!")
+	
+func _handle_datagram(di: DatagramIterator):
+	var msg_type: int = di.get_uint16()
+	if msg_type == MessageTypes.CLIENT_HELLO_RESP:
+		print("Hello from Ardos!")
+	else:
+		print("Unknown message type: ", msg_type)
 
 func _send_heartbeat() -> void:
 	if status != StreamPeerTCP.STATUS_CONNECTED:

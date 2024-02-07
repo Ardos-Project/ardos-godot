@@ -19,3 +19,7 @@ dclass DistributedNode3D : DistributedObject {
   setXYH : setX, setY, setH;
   setXYZH : setX, setY, setZ, setH;
 };
+
+dclass AuthManager : DistributedObject {
+  login(string username);
+}

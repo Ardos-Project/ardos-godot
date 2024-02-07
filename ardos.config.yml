@@ -1,0 +1,102 @@
+# Console output log level.
+# Options are verbose, info, warn, error or none.
+log-level: verbose
+
+# DC (Distributed Class) file paths.
+# These should be kept in-sync globally.
+dc-files:
+  - /app/dclass/demo.dc
+
+# Do we want distributed objects to live on this instance?
+want-state-server: true
+
+# Do we want players to be able to connect to this instance?
+want-client-agent: true
+
+# Do we want to handle database operations on this instance?
+want-database: true
+
+# Do we want database-backed distributed objects to live on this instance?
+want-db-state-server: true
+
+# Do we want metrics collection on this instance?
+want-metrics: true
+
+# UberDOG definitions.
+# Some example ones follow:
+uberdogs:
+  - id: 4665
+    class: AuthManager
+    anonymous: true # Allows un-authenticated clients to communicate with this object.
+
+# Metrics (Prometheus) configuration.
+# This should be configured as a target in your Prometheus config.
+metrics:
+  host: 127.0.0.1
+  port: 9985
+
+# Message Director configuration.
+message-director:
+  # Listen configuration.
+  host: 127.0.0.1
+  port: 7100
+
+  # RabbitMQ configuration.
+  rabbitmq-host: 127.0.0.1
+  rabbitmq-port: 5672
+  rabbitmq-user: guest
+  rabbitmq-password: guest
+
+# State Server configuration.
+state-server:
+  channel: 1000
+
+# Client Agent configuration.
+client-agent:
+  # Listen configuration.
+  host: 127.0.0.1
+  port: 6667
+
+  # The logical version of the server.
+  # This, along with the computed (or manual) DC hash, is used as a first point of contact to authenticate clients.
+  version: godot-demo
+  
+  # Interval in MS of heartbeat messages expected from clients.
+  heartbeat-interval: 30000 # 30 seconds.
+
+  # Time in MS required for clients to authenticate within.
+  auth-timeout: 45000 # 45 seconds.
+  
+  # Allow clients to set their own interests.
+  interests: enabled
+
+  # Allow clients to set the location of their owned objects.
+  relocate-allowed: true
+
+  # The range of channels this CA can allocate.
+  channels:
+    min: 1000000000
+    max: 1009999999
+
+# Database configuration.
+database-server:
+  channel: 4003
+
+  # MongoDB configuration.
+  mongodb-uri: mongodb://localhost:27017/ardos
+
+  # The range of DoId's this database server can allocate.
+  generate:
+    min: 100000000
+    max: 399999999
+
+# Database State Server configuration.
+db-state-server:
+  # The channel of the database server we should use for querying.
+  database: 4003
+
+  # The range of DoId's we should be listening for.
+  # Notice how this matches our database server generate range.
+  ranges:
+    min: 100000000
+    max: 399999999

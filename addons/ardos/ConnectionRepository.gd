@@ -10,6 +10,11 @@ signal connected_to_server()
 signal disconnected_from_server()
 
 
+## Size of the length header for datagrams.
+## sizeof(uint16_t)
+const DG_LENGTH_HEADER_SIZE = 2
+
+
 ## 
 var status : StreamPeerTCP.Status :
 	get:
@@ -36,6 +41,7 @@ var _dc_file: GDDCFile = GDDCFile.new()
 var _dc_imports: Dictionary = {}
 var _dclasses_by_name: Dictionary = {}
 var _dclasses_by_number: Dictionary = {}
+var _data_buf: PackedByteArray = PackedByteArray()
 
 
 func _init():
@@ -49,18 +55,17 @@ func _connect_to_server(host: String, port: int) -> void:
 	if self._socket.connect_to_host(host, port) != OK:
 		self.disconnected_from_server.emit()
 		return
-		
-	# Disable nagle's algorithm.
-	self._socket.set_no_delay(true)
-	
-	# Connected callback.
-	_handle_connected()
-	
-	## Emit the connected signal.
-	#self.connected_to_server.emit()
 	
 ## Inheritors should override.
-func _handle_connected():
+func _handle_connected() -> void:
+	pass
+	
+## Inheritors should override.
+func _handle_disconnected() -> void:
+	pass
+	
+## Inheritors should override.
+func _handle_datagram(di: DatagramIterator) -> void:
 	pass
 
 ##	
@@ -209,16 +214,78 @@ func _import_module(module_name: String, import_symbols: PackedStringArray) -> v
 
 ##
 func _process(delta: float) -> void:
+	# Poll for data.
+	# This will also update the socket connection status.
+	var error: int = self._socket.poll()
+	
+	# If we've had a state change of our connection status, handle it.
+	if self.status != self._last_status:
+		self._last_status = self.status
+		match self.status:
+			StreamPeerTCP.STATUS_NONE:
+				print("Disconnected from host")
+				_handle_disconnected()
+			StreamPeerTCP.STATUS_CONNECTING:
+				print("Connecting to host.")
+			StreamPeerTCP.STATUS_CONNECTED:
+				# Disable nagle's algorithm.
+				self._socket.set_no_delay(true)
+				_handle_connected()
+			StreamPeerTCP.STATUS_ERROR:
+				print("Error with socket stream.")
+				_handle_disconnected()
+		
 	if self.status != StreamPeerTCP.STATUS_CONNECTED:
 		return
-	
-	self._last_status = status
 	
 	var available_bytes: int = self._socket.get_available_bytes()
 	if available_bytes > 0:
 		var data: Array = self._socket.get_partial_data(available_bytes)
 		# Check for read error.
 		if data[0] != OK:
-				print("Error getting data from stream: ", data[0])
+			print("Error getting data from stream: ", data[0])
+			return
+		
+		# We can't directly handle datagrams as it's possible that multiple have been
+  		# buffered together, or we've received a split message.		
+		var bytes: PackedByteArray = data[1]
+		var size: int = bytes.size()
+		
+		# First, check if we have one, complete datagram.
+		if self._data_buf.is_empty() && size >= DG_LENGTH_HEADER_SIZE:
+			# Ok, we at least have a size header. Let's check if we have the full
+			# datagram.
+			var dg_size: int = bytes.decode_u16(0)
+			if (dg_size == size - DG_LENGTH_HEADER_SIZE):
+				# We have a complete datagram, lets handle it.
+				var _di: DatagramIterator = DatagramIterator.new()
+				var _dg: Datagram = Datagram.new()
+				_dg.set_data(bytes)
+				_di.set_data(_dg)
+				_handle_datagram(_di)
+				return
 				
+		# Hmm, we don't. Let's put it into our buffer.
+		self._data_buf.append_array(bytes)
+		self._process_buffer()
 
+func _process_buffer() -> void:
+	while self._data_buf.size() > DG_LENGTH_HEADER_SIZE:
+		# We have enough data to know the expected length of the datagram.
+		var dg_size: int = self._data_buf.decode_u16(0)
+		if self._data_buf.size() >= dg_size + DG_LENGTH_HEADER_SIZE:
+			# We have a complete datagram!
+			var _di: DatagramIterator = DatagramIterator.new()
+			var _dg: Datagram = Datagram.new()
+			
+			# +1 to make the slice end inclusive.
+			var bytes: PackedByteArray = self._data_buf.slice(0, dg_size + DG_LENGTH_HEADER_SIZE + 1)
+			_dg.set_data(bytes)
+			_di.set_data(_dg)
+			
+			# Clear out the complete datagram from the data buffer.
+			self._data_buf = self._data_buf.slice(dg_size + DG_LENGTH_HEADER_SIZE)
+			
+			_handle_datagram(_di)
+		else:
+			return
