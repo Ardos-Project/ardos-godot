@@ -1,4 +1,5 @@
 from addons.ardos import DistributedObject/AI/UD
+from demo.distributed import AuthMgr/UD
 
 // The most fundamental class
 dclass DistributedObject {
@@ -20,6 +21,6 @@ dclass DistributedNode3D : DistributedObject {
   setXYZH : setX, setY, setZ, setH;
 };
 
-dclass AuthManager : DistributedObject {
+dclass AuthMgr : DistributedObject {
   login(string username);
 }

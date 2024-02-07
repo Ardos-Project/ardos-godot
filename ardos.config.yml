@@ -26,7 +26,7 @@ want-metrics: true
 # Some example ones follow:
 uberdogs:
   - id: 4665
-    class: AuthManager
+    class: AuthMgr
     anonymous: true # Allows un-authenticated clients to communicate with this object.
 
 # Metrics (Prometheus) configuration.

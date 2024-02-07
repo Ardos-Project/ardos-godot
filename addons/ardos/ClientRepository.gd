@@ -5,6 +5,7 @@ This maintains a client-side connection with an Ardos server.
 """
 
 var _heartbeat_timer = Timer.new()
+var _heartbeat_interval: int = 10  # 10 seconds.
 var _version: String = ""
 
 
@@ -14,12 +15,18 @@ func _init(dc_file_names: PackedStringArray = [], dc_suffix: String = ""):
 
 	self.read_dc_file(dc_file_names)
 	
-	# Heartbeat is "processed" each physics frame.
+	# Heartbeat timer is "processed" each physics frame.
 	# Should help with reliability.
 	_heartbeat_timer.process_callback = Timer.TIMER_PROCESS_PHYSICS
 	_heartbeat_timer.name = "Heartbeat Timer"
 	_heartbeat_timer.timeout.connect(_send_heartbeat)
 	
+	# The interval in which heartbeat messages are sent.
+	# This should be LESS than whatever was set in the Ardos config to allow for
+	# network latency, dropped packets and application freezing/lag.
+	if ProjectSettings.has_setting("application/ardos/heartbeat_interval"):
+		_heartbeat_interval = ProjectSettings.get_setting("application/ardos/heartbeat_interval")
+		
 func _ready():
 	add_child(_heartbeat_timer)
 	
@@ -36,19 +43,27 @@ func _handle_connected():
 	self.send(_dg)
 	
 func _handle_disconnected():
-	print("Disconnected from Ardos!")
+	# Stop sending heartbeat messages.
+	self._heartbeat_timer.stop()
+	# Emit the disconnected signal.
+	self.disconnected_from_server.emit()
 	
 func _handle_datagram(di: DatagramIterator):
 	var msg_type: int = di.get_uint16()
 	if msg_type == MessageTypes.CLIENT_HELLO_RESP:
-		print("Hello from Ardos!")
+		# Start sending heartbeat messages.
+		self._heartbeat_timer.start(_heartbeat_interval)
+		# Emit the connected signal.
+		self.connected_to_server.emit()
+	elif msg_type == MessageTypes.CLIENT_EJECT:
+		# We've been forcefully disconnected by the server.
+		var reason: int = di.get_uint16()
+		var message: String = di.get_string()
+		print("Disconnected by server %s - %s" % [reason, message])
 	else:
 		print("Unknown message type: ", msg_type)
 
 func _send_heartbeat() -> void:
-	if status != StreamPeerTCP.STATUS_CONNECTED:
-		return
-
 	# Send off a heartbeat message.
 	var _dg: Datagram = Datagram.new()
 	_dg.add_uint16(MessageTypes.CLIENT_HEARTBEAT)

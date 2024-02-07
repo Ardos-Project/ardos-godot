@@ -41,8 +41,8 @@ var _dc_file: GDDCFile = GDDCFile.new()
 var _dc_imports: Dictionary = {}
 var _dclasses_by_name: Dictionary = {}
 var _dclasses_by_number: Dictionary = {}
+var _do_by_id: Dictionary = {}
 var _data_buf: PackedByteArray = PackedByteArray()
-
 
 func _init():
 	pass
@@ -90,6 +90,45 @@ func send(dg: Datagram) -> bool:
 		return false
 		
 	return true
+	
+## Generate an instance of a global distributed object (UD)
+## and put it into our local tables.
+func generate_global_object(do_id: int, dc_name: String, values = []) -> DistributedObjectBase:
+	# Look up the dclass.
+	var dclass_name: String = dc_name + dc_suffix
+	var dclass: GDDCClass = self._dclasses_by_name.get(dclass_name)
+	if not dclass:
+		print("[ConnectionRepository] WARNING: Need to define %s" % dclass_name)
+		dclass_name = dc_name + "AI"
+		dclass = self._dclasses_by_name.get(dclass_name)
+		
+	if not dclass:
+		dclass_name = dc_name
+		dclass = self._dclasses_by_name.get(dclass_name)
+		
+	# Construct the distributed object.
+	var class_def = self._dc_imports.get(dclass_name)
+	if not class_def:
+		print("[ConnectionRepository] ERROR: Could not construct an undefined %s" % dclass_name)
+		return
+		
+	var dist_obj: DistributedObjectBase = class_def.new()
+	dist_obj.cr = self
+	dist_obj.dclass = dclass
+	dist_obj.do_id = do_id
+	dist_obj.parent_id = 0
+	dist_obj.zone_id = 0
+	dist_obj.name = "%d - %s" % [do_id, dclass_name]
+	# Put the new distributed object into the dictionary.
+	self._do_by_id[do_id] = dist_obj
+	# generate_init is only called when constructed.
+	dist_obj.generate_init()
+	dist_obj.generate()
+	# Add the distributed object to the scene graph and call the final generate.
+	add_child(dist_obj)
+	dist_obj.announce_generate()
+	
+	return dist_obj
 	
 ## 
 func read_dc_file(file_names: PackedStringArray = []) -> void:
@@ -223,7 +262,6 @@ func _process(delta: float) -> void:
 		self._last_status = self.status
 		match self.status:
 			StreamPeerTCP.STATUS_NONE:
-				print("Disconnected from host")
 				_handle_disconnected()
 			StreamPeerTCP.STATUS_CONNECTING:
 				print("Connecting to host.")
