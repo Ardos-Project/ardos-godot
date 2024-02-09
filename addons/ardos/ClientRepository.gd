@@ -60,6 +60,24 @@ func _handle_datagram(di: DatagramIterator):
 		var reason: int = di.get_uint16()
 		var message: String = di.get_string()
 		print("Disconnected by server %s - %s" % [reason, message])
+	elif msg_type == MessageTypes.CLIENT_ENTER_OBJECT_REQUIRED:
+		pass
+	elif msg_type == MessageTypes.CLIENT_ENTER_OBJECT_REQUIRED_OTHER:
+		pass
+	elif msg_type == MessageTypes.CLIENT_ENTER_OBJECT_REQUIRED_OWNER:
+		pass
+	elif msg_type == MessageTypes.CLIENT_ENTER_OBJECT_REQUIRED_OTHER_OWNER:
+		pass
+	elif msg_type == MessageTypes.CLIENT_OBJECT_SET_FIELD:
+		pass
+	elif msg_type == MessageTypes.CLIENT_OBJECT_LEAVING:
+		pass
+	elif msg_type == MessageTypes.CLIENT_OBJECT_LEAVING_OWNER:
+		pass
+	elif msg_type == MessageTypes.CLIENT_DONE_INTEREST_RESP:
+		pass
+	elif msg_type == MessageTypes.CLIENT_OBJECT_LOCATION:
+		pass
 	else:
 		print("Unknown message type: ", msg_type)
 
