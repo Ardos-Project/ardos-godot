@@ -1,11 +1,12 @@
 class_name DistributedObjectAI extends DistributedObjectBase
 
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
+## 
+var air : ServerRepository :
+	get:
+		return self.repository
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
+func send_update(field_name: String, args: Array = []):
+	var _dg: Datagram = self.dclass.ai_format_update(field_name, self.do_id, self.do_id, self.air.our_channel, args)
+	self.air.send(_dg)

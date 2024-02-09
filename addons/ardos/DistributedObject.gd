@@ -1,11 +1,12 @@
 class_name DistributedObject extends DistributedObjectBase
 
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
+## 
+var cr : ClientRepository : 
+	get:
+		return self.repository
+		
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
+func send_update(field_name: String, args: Array = [], send_to_id: int = self.do_id):
+	var _dg: Datagram = self.dclass.client_format_update(field_name, send_to_id or self.do_id, args)
+	self.cr.send(_dg)

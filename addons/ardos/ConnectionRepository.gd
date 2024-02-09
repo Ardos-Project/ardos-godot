@@ -44,8 +44,6 @@ var _dclasses_by_number: Dictionary = {}
 var _do_by_id: Dictionary = {}
 var _data_buf: PackedByteArray = PackedByteArray()
 
-func _init():
-	pass
 
 ##
 func _connect_to_server(host: String, port: int) -> void:
@@ -113,7 +111,7 @@ func generate_global_object(do_id: int, dc_name: String, values = []) -> Distrib
 		return
 		
 	var dist_obj: DistributedObjectBase = class_def.new()
-	dist_obj.cr = self
+	dist_obj.repository = self
 	dist_obj.dclass = dclass
 	dist_obj.do_id = do_id
 	dist_obj.parent_id = 0

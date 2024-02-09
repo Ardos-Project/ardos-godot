@@ -6,7 +6,7 @@ The Distributed Object class is the base class for all network based
 dclass entry in a *.dc file.
 """
 
-var cr: ConnectionRepository = null
+var repository = null
 var dclass: GDDCClass = null
 var do_id: int = 0
 var parent_id: int = 0
