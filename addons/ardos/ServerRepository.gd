@@ -38,7 +38,7 @@ func allocate_channel() -> int:
 	
 	return channel
 
-func _handle_datagram(di: DatagramIterator):
+func _handle_datagram(di: DatagramIterator) -> void:
 	var msg_type: int = di.get_uint16()
 	if msg_type in [
 		MessageTypes.STATESERVER_OBJECT_ENTER_AI_WITH_REQUIRED,
@@ -77,8 +77,48 @@ func _handle_datagram(di: DatagramIterator):
 		print("[ServerRepository] ERROR: Received message with unknown MsgType=%d" % msg_type)
 
 ##
-func _handle_obj_entry(di: DatagramIterator, other: bool):
-	pass
+func _handle_obj_entry(di: DatagramIterator, other: bool) -> void:
+	var do_id: int = di.get_uint32()
+	var parent_id: int = di.get_uint32()
+	var zone_id: int = di.get_uint32()
+	var class_id: int = di.get_uint16()
+	
+	if class_id not in self._dclasses_by_number:
+		assert(false, "Received entry for unknown dclass=%d! (DoId: %d)" % [class_id, do_id])
+		return
+	
+	if do_id in self.collection_manager.do_by_id:
+		# We already know about this object; ignore the entry.
+		return
+	
+	var dclass = self._dclasses_by_number[class_id]
+	var dclass_name = dclass.get_name() + self._dc_suffix
+	
+	# Construct the distributed object.
+	var class_def = self._dc_imports.get(dclass_name)
+	if not class_def:
+		print("[ServerRepository] ERROR: Could not construct an undefined %s" % dclass_name)
+		return
+	
+	var dist_obj: DistributedObjectAI = class_def.new()
+	dist_obj.repository = self
+	dist_obj.dclass = dclass
+	dist_obj.do_id = do_id
+	# The DO came in off the server, so we do not unregister the channel when
+	# it dies:
+	dist_obj.do_not_dealloc_channel = true
+	dist_obj.name = "%d - %s" % [do_id, dclass_name]
+	self.collection_manager.add_do_to_tables(dist_obj, parent_id, zone_id)
+	
+	# Now for generation:
+	dist_obj.generate()
+	if other:
+		dist_obj.update_all_required_other_fields(di)
+	else:
+		dist_obj.update_all_required_fields(di)
+		
+	add_child(dist_obj)
+	dist_obj.announce_generate()
 	
 ##
 func _handle_obj_exit(di: DatagramIterator):

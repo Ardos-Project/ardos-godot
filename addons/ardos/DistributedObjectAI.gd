@@ -5,6 +5,10 @@ class_name DistributedObjectAI extends DistributedObjectBase
 var air : ServerRepository :
 	get:
 		return self.repository
+		
+## Should this distributed object's channel not be released upon deletion?
+## This should be false for DO's generated on this server.
+var do_not_dealloc_channel: bool = false
 
 
 func send_update(field_name: String, args: Array = []):

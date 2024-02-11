@@ -34,6 +34,12 @@ var dc_suffix: String = ""
 ## view of it regardless of where it currently is located')
 var owner_views: bool = false
 
+## Collection of distributed object's currently in 'view' of this client/server.
+var collection_manager: DoCollectionManager = DoCollectionManager.new()
+
+## Manager of open interest handles (client only.)
+var interest_manager: DoInterestManager = DoInterestManager.new()
+
 
 var _socket: StreamPeerTCP = StreamPeerTCP.new()
 var _last_status: StreamPeerTCP.Status = StreamPeerTCP.STATUS_NONE
@@ -41,7 +47,6 @@ var _dc_file: GDDCFile = GDDCFile.new()
 var _dc_imports: Dictionary = {}
 var _dclasses_by_name: Dictionary = {}
 var _dclasses_by_number: Dictionary = {}
-var _do_by_id: Dictionary = {}
 var _data_buf: PackedByteArray = PackedByteArray()
 
 
@@ -118,7 +123,7 @@ func generate_global_object(do_id: int, dc_name: String, values = []) -> Distrib
 	dist_obj.zone_id = 0
 	dist_obj.name = "%d - %s" % [do_id, dclass_name]
 	# Put the new distributed object into the dictionary.
-	self._do_by_id[do_id] = dist_obj
+	self.collection_manager.do_by_id[do_id] = dist_obj
 	# generate_init is only called when constructed.
 	dist_obj.generate_init()
 	dist_obj.generate()
