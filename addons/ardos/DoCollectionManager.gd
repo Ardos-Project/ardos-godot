@@ -8,6 +8,9 @@ const BAD_ZONE_ID: int = 0
 const BAD_CHANNEL_ID: int = 0
 
 
+## This should be re-defined to the global DoId of this game.
+var GAME_GLOBALS_ID: int = 0
+
 ## Dictionary of Distributed Object's mapped by their DoId's.
 var do_by_id: Dictionary = {}
 
@@ -55,6 +58,21 @@ func add_do_to_tables(do: DistributedObjectBase, parent_id: int = 0,
 		if self._is_valid_location(parent_id, zone_id):
 			self._store_object_location(do, parent_id, zone_id)
 
+## Removes a distributed object from this manager.
+func remove_do_from_tables(do: DistributedObjectBase):
+	var parent_id: int = do.parent_id
+	var zone_id: int = do.zone_id
+	
+	if self._is_valid_location(parent_id, zone_id):
+		var parent_do: DistributedObjectBase = get_do(parent_id)
+		if parent_do:
+			parent_do.handle_child_leave(do, zone_id)
+			
+		self._delete_object_location_table(do, parent_id, zone_id)
+	
+	if do.do_id in self.do_by_id:
+		self.do_by_id[do.do_id] = null
+
 ## Returns true if a location is valid within the DO hierarchy.
 func _is_valid_location(parent_id: int, zone_id: int) -> bool:
 	return (parent_id != BAD_DO_ID and zone_id != BAD_ZONE_ID)
@@ -95,23 +113,66 @@ func _store_object_location(do: DistributedObjectBase, parent_id: int, zone_id: 
 		# Give the parent a chance to run code when a new child
 		# sets location to it. For example, the parent may want to
 		# scene graph reparent the child to some subnode it owns.
-		pass
+		var parent_do: DistributedObjectBase = get_do(parent_id)
+		if parent_do:
+			parent_do.handle_child_arrive(do, zone_id)
+		elif parent_id not in [BAD_DO_ID, GAME_GLOBALS_ID]:
+			print("[DoCollectionManager] WARNING: store_object_location(%d): parent %d not present" % [
+				do.do_id, parent_id
+			])
 		
 	elif old_zone_id != zone_id:
-		pass
+		var parent_do: DistributedObjectBase = get_do(parent_id)
+		if parent_do:
+			parent_do.handle_child_arrive_zone(do, zone_id)
+		elif parent_id not in [BAD_DO_ID, GAME_GLOBALS_ID]:
+			print("[DoCollectionManager] WARNING: store_object_location(%d): parent %d not present" % [
+				do.do_id, parent_id
+			])
 	
 ##
 func _store_object_location_table(do: DistributedObjectBase, parent_id: int, zone_id: int):
-	pass
+	var do_id: int = do.do_id
+	if do_id in self._do_table_ids:
+		assert(false, "_store_object_location_table(%s %d) already in _do_table_ids; duplicate generate()? or didn't clean up previous instance of DO?" % [
+			do.dclass.get_name(), do_id
+		])
+		return
+		
+	var parent_zone_dict: Dictionary = self._do_table.get(parent_id, {})
+	var zone_do_set: Array = parent_zone_dict.get(zone_id, [])
+	
+	zone_do_set.append(do_id)
+	self._do_table_ids.append(do_id)
 	
 ## 
 func _delete_object_location_table(do: DistributedObjectBase, parent_id: int, zone_id: int):
 	var do_id: int = do.do_id
 	if do_id not in self._do_table_ids:
-		assert(false, "delete_object_location_table(%s %s) not in _do_table_ids; duplicate delete()? or invalid previous location on a new object?" % [
+		assert(false, "delete_object_location_table(%s %d) not in _do_table_ids; duplicate delete()? or invalid previous location on a new object?" % [
 			do.dclass.get_name(), do_id
 		])
 		return
+		
+	var parent_zone_dict: Dictionary = self._do_table.get(parent_id)
+	if not parent_zone_dict:
+		assert(false, "_delete_object_location_table: parentId: %d not found" % parent_id)
+		return
+		
+	var zone_do_set: Array = parent_zone_dict.get(zone_id)
+	if not zone_do_set:
+		assert(false, "_delete_object_location_table: zoneId: %d not found" % zone_id)
+		return
+
+	if do_id not in zone_do_set:
+		assert(false, "_delete_object_location_table: objId: %d not found" % do_id)
+		return
 	
+	# Clear out the DoId.
+	zone_do_set.erase(do_id)
+	self._do_table_ids.erase(do_id)
 	
-	
+	if len(zone_do_set) == 0:
+		parent_zone_dict[zone_id] = null
+		if len(parent_zone_dict) == 0:
+			self._do_table[parent_id] = null

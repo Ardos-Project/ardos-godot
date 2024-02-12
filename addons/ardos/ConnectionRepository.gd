@@ -288,7 +288,7 @@ func _process(delta: float) -> void:
 			return
 		
 		# We can't directly handle datagrams as it's possible that multiple have been
-  		# buffered together, or we've received a split message.		
+  		# buffered together, or we've received a split message.
 		var bytes: PackedByteArray = data[1]
 		var size: int = bytes.size()
 		

@@ -1,5 +1,15 @@
 class_name ServerRepository extends ConnectionRepository
 
+"""
+This class interfaces with an Ardos (https://github.com/Ardos/Ardos) server in
+order to manipulate objects in the Ardos cluster. It does not require any
+specific "gateway" into the Ardos network. Rather, it just connects directly
+to any Message Director. Hence, it is an "internal" repository.
+
+This class is suitable for constructing your own AI Servers and UberDOG servers
+using Godot. Objects with a "self.air" attribute are referring to an instance
+of this class.
+"""
 
 # The channel allocated as this server's sender id.
 var our_channel: int = 0
@@ -9,6 +19,9 @@ var channel_allocator: UniqueIdAllocator = UniqueIdAllocator.new()
 # The range of channels this AI controls.
 var _min_channel: int = 0
 var _max_channel: int = 0
+
+# Channels this server has opened for receiving messages from the Message Director.
+var _open_channels: Array = []
 
 
 func _init(dc_file_names: PackedStringArray = [], dc_suffix: String = "", min_channel: int = 0, max_channel: int = 0):
@@ -30,7 +43,9 @@ func _init(dc_file_names: PackedStringArray = [], dc_suffix: String = "", min_ch
 func connect_to_server(host: String, port: int) -> void:
 	super._connect_to_server(host, port)
 
-##
+## Allocate an unused channel out of this AIR's configured channel space.
+## This is also used to allocate IDs for DistributedObjects, since those
+## occupy a channel.
 func allocate_channel() -> int:
 	var channel: int = self.channel_allocator.allocate()
 	if channel == -1:
@@ -38,6 +53,49 @@ func allocate_channel() -> int:
 	
 	return channel
 
+## Return a previously-allocated channel back to the allocation pool.
+func deallocate_channel(channel: int) -> void:
+	self.channel_allocator.free(channel)
+	
+## Register for messages on a specific Message Director channel.
+## If the channel is already open by this AIR, nothing will happen.
+func register_for_channel(channel: int):
+	if channel in self._open_channels:
+		return
+		
+	self._open_channels.append(channel)
+	
+	var dg: Datagram = Datagram.new()
+	dg.add_server_control_header(MessageTypes.CONTROL_ADD_CHANNEL)
+	dg.add_uint64(channel)
+	self.send(dg)
+	
+## Unregister a channel subscription on the Message Director. The Message
+## Director will cease to relay messages to this AIR sent on the channel.
+func unregister_for_channel(channel: int):
+	if channel not in self._open_channels:
+		return
+		
+	self._open_channels.erase(channel)
+	
+	var dg: Datagram = Datagram.new()
+	dg.add_server_control_header(MessageTypes.CONTROL_REMOVE_CHANNEL)
+	dg.add_uint64(channel)
+	self.send(dg)
+	
+## Set the connection name for this MD client displayed in Ardos logs.
+func set_con_name(con_name: String):
+	var dg: Datagram = Datagram.new()
+	dg.add_server_control_header(MessageTypes.CONTROL_SET_CON_NAME)
+	dg.add_string(con_name)
+	self.send(dg)
+	
+## 
+func _handle_connected():
+	# Listen to our channel...
+	self.register_for_channel(self.our_channel)
+	
+## 
 func _handle_datagram(di: DatagramIterator) -> void:
 	var msg_type: int = di.get_uint16()
 	if msg_type in [
@@ -50,6 +108,8 @@ func _handle_datagram(di: DatagramIterator) -> void:
 		MessageTypes.STATESERVER_OBJECT_DELETE_RAM
 	]:
 		self._handle_obj_exit(di)
+	elif msg_type == MessageTypes.STATESERVER_OBJECT_SET_FIELD:
+		self._handle_set_field(di)
 	elif msg_type == MessageTypes.STATESERVER_OBJECT_CHANGING_LOCATION:
 		pass
 	elif msg_type in [
@@ -122,5 +182,27 @@ func _handle_obj_entry(di: DatagramIterator, other: bool) -> void:
 	
 ##
 func _handle_obj_exit(di: DatagramIterator):
-	pass
+	var do_id: int = di.get_uint32()
 	
+	var do: DistributedObjectBase = self.collection_manager.get_do(do_id)
+	if not do:
+		print("[ServerRepository] WARNING: Received AI exit for unknown object %d" % do_id)
+		return
+	
+	self.collection_manager.remove_do_from_tables(do)	
+	do.delete()
+	
+##
+func _handle_set_field(di: DatagramIterator):
+	var do_id: int = di.get_uint32()
+	
+	var do: DistributedObjectBase = self.collection_manager.get_do(do_id)
+	if not do:
+		return
+	
+	var data: Array = do.dclass.receive_update(di)
+	if len(data) == 0:
+		return
+
+	var callable: Callable = Callable(do, data.pop_front())
+	callable.call(data)
