@@ -90,6 +90,14 @@ func set_con_name(con_name: String):
 	dg.add_string(con_name)
 	self.send(dg)
 	
+## Sets the AI of the specified DistributedObjectAI to be the specified channel.
+## Generally, you should not call this method, and instead call DistributedObjectAI.set_ai.
+func set_ai(do_id: int, ai_channel: int):
+	var dg: Datagram = Datagram.new()
+	dg.add_server_header(do_id, ai_channel, MessageTypes.STATESERVER_OBJECT_SET_AI)
+	dg.add_uint64(ai_channel)
+	self.send(dg)
+	
 ## 
 func _handle_connected():
 	# Listen to our channel...
@@ -189,7 +197,7 @@ func _handle_obj_exit(di: DatagramIterator):
 		print("[ServerRepository] WARNING: Received AI exit for unknown object %d" % do_id)
 		return
 	
-	self.collection_manager.remove_do_from_tables(do)	
+	self.collection_manager.remove_do_from_tables(do)
 	do.delete()
 	
 ##

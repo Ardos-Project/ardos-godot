@@ -29,3 +29,33 @@ func generate():
 ## of its required fields filled in. Overwrite when needed.
 func announce_generate():
 	self.__generated = true
+
+## Override this to handle cleanup right before this object
+## gets deleted.
+func delete():
+	self.__generated = false
+
+## A new child has just setLocation beneath us. Give us a
+## chance to run code when a new child sets location to us. For
+## example, we may want to scene graph reparent the child to
+## some subnode we own.
+func handle_child_arrive(child_obj: DistributedObjectBase, zone_id: int):
+	pass
+	
+## A child has just changed zones beneath us with setLocation.
+## Give us a chance to run code when an existing child sets
+## location to us. For example, we may want to scene graph
+## reparent the child to some subnode we own.
+func handle_child_arrive_zone(child_obj: DistributedObjectBase, zone_id: int):
+	pass
+
+## A child is about to setLocation away from us. Give us a
+## chance to run code just before a child sets location away from us.
+func handle_child_leave(child_obj: DistributedObjectBase, zone_id: int):
+	pass
+
+## A child is about to setLocation to another zone beneath us.
+## Give us a chance to run code just before a child sets
+## location to that zone.
+func handle_child_leave_zone(child_obj: DistributedObjectBase, zone_id: int):
+	pass
