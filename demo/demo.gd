@@ -1,6 +1,5 @@
 extends Node3D
 
-
 var _client: bool = true
 
 
@@ -16,5 +15,5 @@ func _ready():
 		var _ud = DemoServerUD.new(["data/dclass/demo.dc"])
 		_ud.name = "DemoServerUD"
 		add_child(_ud)
-		
+
 		_ud.connect_to_server("127.0.0.1", 7100)
