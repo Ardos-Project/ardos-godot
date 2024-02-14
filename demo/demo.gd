@@ -24,7 +24,7 @@ func _ready():
 			_ud.name = "DemoServerUD"
 			add_child(_ud)
 
-			_ud.connect_to_server(md_host, 7100)
+			_ud.connect_to_server(md_host, 7199)
 
 		elif "--ai" in OS.get_cmdline_user_args():
 			var _cls = load("res://demo/DemoServerAI.gd")
@@ -33,7 +33,7 @@ func _ready():
 			_ai.name = "DemoServerAI"
 			add_child(_ai)
 
-			_ai.connect_to_server(md_host, 7100)
+			_ai.connect_to_server(md_host, 7199)
 	else:
 		# We're running as a client.
 		var _cls = load("res://demo/DemoClient.gd")

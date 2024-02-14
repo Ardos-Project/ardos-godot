@@ -39,7 +39,7 @@ metrics:
 message-director:
   # Listen configuration.
   host: 127.0.0.1
-  port: 7100
+  port: 7199
 
   # RabbitMQ configuration.
   rabbitmq-host: 127.0.0.1

@@ -99,7 +99,7 @@ func send(dg: Datagram) -> bool:
 
 ## Generate an instance of a global distributed object (UD)
 ## and put it into our local tables.
-func generate_global_object(do_id: int, dc_name: String, values = []) -> DistributedObjectBase:
+func generate_global_object(do_id: int, dc_name: String) -> DistributedObjectBase:
 	# Look up the dclass.
 	var dclass_name: String = dc_name + dc_suffix
 	var dclass: GDDCClass = self._dclasses_by_name.get(dclass_name)
