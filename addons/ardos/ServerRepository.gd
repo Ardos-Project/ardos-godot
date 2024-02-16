@@ -14,6 +14,8 @@ of this class.
 # The channel allocated as this server's sender id.
 var our_channel: int = 0
 var channel_allocator: UniqueIdAllocator = UniqueIdAllocator.new()
+# Channel ID of the current message sender.
+var msg_sender: int = 0
 
 # The range of channels this AI controls.
 var _min_channel: int = 0
@@ -120,8 +122,10 @@ func _handle_connected():
 func _handle_datagram(di: DatagramIterator) -> void:
 	var channel_count: int = di.get_uint8()
 	for i in range(channel_count):
+		# Discard target channels, we don't need them.
 		di.get_uint64()
-	var sender: int = di.get_uint64()
+
+	self.msg_sender = di.get_uint64()
 
 	var msg_type: int = di.get_uint16()
 	if (
