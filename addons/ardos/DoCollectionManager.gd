@@ -74,6 +74,9 @@ func remove_do_from_tables(do: DistributedObjectBase):
 	if do.do_id in self.do_by_id:
 		self.do_by_id[do.do_id] = null
 
+	if do.do_id in self.do_by_id_ov:
+		self.do_by_id_ov[do.do_id] = null
+
 
 ## Returns true if a location is valid within the DO hierarchy.
 func _is_valid_location(parent_id: int, zone_id: int) -> bool:

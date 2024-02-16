@@ -120,10 +120,8 @@ func _handle_connected():
 
 ##
 func _handle_datagram(di: DatagramIterator) -> void:
-	var channel_count: int = di.get_uint8()
-	for i in range(channel_count):
-		# Discard target channels, we don't need them.
-		di.get_uint64()
+	# Discard target channels, we don't need them.
+	di.seek_payload()
 
 	self.msg_sender = di.get_uint64()
 
@@ -231,6 +229,9 @@ func _handle_obj_exit(di: DatagramIterator):
 
 	self.collection_manager.remove_do_from_tables(do)
 	do.delete()
+
+	# Delete the object from the scene graph.
+	do.queue_free()
 
 
 ##
