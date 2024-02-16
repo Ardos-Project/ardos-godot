@@ -14,6 +14,8 @@ of this class.
 # The channel allocated as this server's sender id.
 var our_channel: int = 0
 var channel_allocator: UniqueIdAllocator = UniqueIdAllocator.new()
+# Configured State Server ID.
+var server_id: int = 0
 # Channel ID of the current message sender.
 var msg_sender: int = 0
 
@@ -29,7 +31,8 @@ func _init(
 	dc_file_names: PackedStringArray = [],
 	dc_suffix: String = "",
 	min_channel: int = 0,
-	max_channel: int = 0
+	max_channel: int = 0,
+	stateserver_id: int = 0
 ):
 	self.dc_suffix = dc_suffix
 
@@ -44,6 +47,10 @@ func _init(
 
 	# Give ourselves the first channel in the range
 	self.our_channel = self.allocate_channel()
+
+	# The State Server we are configured to use for creating objects.
+	# If this is 0, generating objects is not possible.
+	self.server_id = stateserver_id
 
 
 ##

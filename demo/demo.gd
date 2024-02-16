@@ -29,7 +29,9 @@ func _ready():
 		elif "--ai" in OS.get_cmdline_user_args():
 			var _cls = load("res://demo/DemoServerAI.gd")
 
-			var _ai = _cls.new(DC_FILES, "AI", base_channel, base_channel + channel_alloc)
+			var _ai = _cls.new(
+				DC_FILES, "AI", base_channel, base_channel + channel_alloc, stateserver_id
+			)
 			_ai.name = "DemoServerAI"
 			add_child(_ai)
 
