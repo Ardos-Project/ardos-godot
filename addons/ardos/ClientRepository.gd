@@ -78,9 +78,9 @@ func _handle_datagram(di: DatagramIterator):
 	elif msg_type == MessageTypes.CLIENT_OBJECT_LEAVING_OWNER:
 		self._handle_leaving(di, true)
 	elif msg_type == MessageTypes.CLIENT_DONE_INTEREST_RESP:
-		pass
+		self._handle_interest_done(di)
 	elif msg_type == MessageTypes.CLIENT_OBJECT_LOCATION:
-		pass
+		self._handle_location(di)
 	else:
 		print("Unknown message type: ", msg_type)
 
@@ -231,3 +231,25 @@ func _handle_leaving(di: DatagramIterator, owner: bool = false):
 
 	# Delete the object from the scene graph.
 	do.queue_free()
+
+
+##
+func _handle_interest_done(di: DatagramIterator):
+	# TODO.
+	pass
+
+
+##
+func _handle_location(di: DatagramIterator):
+	var do_id: int = di.get_uint32()
+	var parent_id: int = di.get_uint32()
+	var zone_id: int = di.get_uint32()
+
+	var do: DistributedObject = self.collection_manager.get_do(do_id)
+	if not do:
+		print(
+			"[ClientRepository] WARNING: Asked to update location of non-existent obj: %d" % do_id
+		)
+		return
+
+	do.set_location(parent_id, zone_id)
