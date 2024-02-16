@@ -118,6 +118,11 @@ func _handle_connected():
 
 ##
 func _handle_datagram(di: DatagramIterator) -> void:
+	var channel_count: int = di.get_uint8()
+	for i in range(channel_count):
+		di.get_uint64()
+	var sender: int = di.get_uint64()
+
 	var msg_type: int = di.get_uint16()
 	if (
 		msg_type
@@ -237,4 +242,4 @@ func _handle_set_field(di: DatagramIterator):
 		return
 
 	var callable: Callable = Callable(do, data.pop_front())
-	callable.call(data)
+	callable.callv(data)

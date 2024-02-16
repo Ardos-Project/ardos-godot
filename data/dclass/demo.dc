@@ -22,5 +22,5 @@ dclass DistributedNode3D : DistributedObject {
 };
 
 dclass AuthMgr : DistributedObject {
-  login(string username);
+  login(string username) clsend;
 }
