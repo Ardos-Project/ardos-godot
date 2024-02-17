@@ -119,10 +119,37 @@ func set_ai(do_id: int, ai_channel: int):
 	self.send(dg)
 
 
+## Generate an object onto the State Server, choosing an ID from the pool.
+## You should use do.generate_with_required(...) instead. This is not meant
+## to be called directly unless you really know what you are doing.
+func generate_with_required(do: DistributedObjectAI, parent_id: int, zone_id: int):
+	var do_id: int = self.allocate_channel()
+	self.generate_with_required_and_id(do, do_id, parent_id, zone_id)
+
+
+## Generate an object onto the State Server, specifying its ID and location.
+## You should use do.generate_with_required_and_id(...) instead. This is not
+## meant to be called directly unless you really know what you are doing.
+func generate_with_required_and_id(
+	do: DistributedObjectAI, do_id: int, parent_id: int, zone_id: int
+):
+	do.do_id = do_id
+	self.collection_manager.add_do_to_tables(do, parent_id, zone_id)
+	self._send_generate_with_required(do, parent_id, zone_id)
+
+
 ##
 func _handle_connected():
 	# Listen to our channel...
 	self.register_for_channel(self.our_channel)
+
+
+##
+func _send_generate_with_required(do: DistributedObjectAI, parent_id: int, zone_id: int):
+	var dg: Datagram = do.dclass.ai_format_generate(
+		do, do.do_id, parent_id, zone_id, self.server_id, self.our_channel
+	)
+	self.send(dg)
 
 
 ##
@@ -151,7 +178,7 @@ func _handle_datagram(di: DatagramIterator) -> void:
 	elif msg_type == MessageTypes.STATESERVER_OBJECT_SET_FIELD:
 		self._handle_set_field(di)
 	elif msg_type == MessageTypes.STATESERVER_OBJECT_CHANGING_LOCATION:
-		pass
+		self._handle_obj_changing_location(di)
 	elif (
 		msg_type
 		in [
@@ -255,3 +282,17 @@ func _handle_set_field(di: DatagramIterator):
 
 	var callable: Callable = Callable(do, data.pop_front())
 	callable.callv(data)
+
+
+##
+func _handle_obj_changing_location(di: DatagramIterator):
+	var do_id: int = di.get_uint32()
+	var parent_id: int = di.get_uint32()
+	var zone_id: int = di.get_uint32()
+
+	var do: DistributedObjectBase = self.collection_manager.get_do(do_id)
+	if not do:
+		print("[ServerRepository] WARNING: Received location for unknown doId=%d!" % do_id)
+		return
+
+	do.set_location(parent_id, zone_id)

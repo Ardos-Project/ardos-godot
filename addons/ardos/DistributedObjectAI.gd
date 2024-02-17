@@ -32,3 +32,26 @@ func send_update(field_name: String, args: Array = []):
 ## Sets the AI of this DistributedObjectAI to the specified channel.
 func set_ai(ai_channel: int):
 	self.air.set_ai(self.do_id, ai_channel)
+
+
+## Generate an object onto the State Server, choosing an ID from the pool.
+func generate_with_required(parent_id: int, zone_id: int):
+	self.air.generate_with_required(self, parent_id, zone_id)
+	self.generate()
+	self.announce_generate()
+
+
+## Generate an object onto the State Server, specifying its ID and location.
+func generate_with_required_and_id(do_id: int, parent_id: int, zone_id: int):
+	self.air.generate_with_required_and_id(self, do_id, parent_id, zone_id)
+	self.generate()
+	self.announce_generate()
+
+
+##
+func set_location(parent_id: int, zone_id: int):
+	# Prevent duplicate set_locations from being called.
+	if self.parent_id == parent_id and self.zone_id == zone_id:
+		return
+
+	self.air.collection_manager._store_object_location(self, parent_id, zone_id)
