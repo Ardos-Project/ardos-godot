@@ -1,25 +1,43 @@
 from addons.ardos import DistributedObject/AI/UD
+from addons.ardos import DistributedNode/AI
+from demo.distributed import DistributedAvatar/AI
+from demo.distributed import DistributedDistrict/AI
 from demo.distributed import AuthMgr/UD
+
 
 // The most fundamental class
 dclass DistributedObject {
 };
 
-dclass DistributedNode3D : DistributedObject {
-  setX(int16/10) broadcast ram ownsend airecv;
-  setY(int16/10) broadcast ram ownsend airecv;
-  setZ(int16/10) broadcast ram ownsend airecv;
-  setH(int16%360/10) broadcast ram ownsend airecv;
-  setP(int16%360/10) broadcast ram ownsend airecv;
-  setR(int16%360/10) broadcast ram ownsend airecv;
-  setPos : setX, setY, setZ;
-  setHpr : setH, setP, setR;
-  setPosHpr : setX, setY, setZ, setH, setP, setR;
-  setXY : setX, setY;
-  setXZ : setX, setZ;
-  setXYH : setX, setY, setH;
-  setXYZH : setX, setY, setZ, setH;
+
+dclass DistributedNode : DistributedObject {
+  set_x(int16/10) broadcast ram ownsend airecv;
+  set_y(int16/10) broadcast ram ownsend airecv;
+  set_z(int16/10) broadcast ram ownsend airecv;
+  set_h(int16%360/10) broadcast ram ownsend airecv;
+  set_p(int16%360/10) broadcast ram ownsend airecv;
+  set_r(int16%360/10) broadcast ram ownsend airecv;
+  set_pos : set_x, set_y, set_z;
+  set_hpr : set_h, set_p, set_r;
+  set_pos_hpr : set_x, set_y, set_z, set_h, set_p, set_r;
+  set_xy : set_x, set_y;
+  set_xz : set_x, set_z;
+  set_xyh : set_x, set_y, set_h;
+  set_xyzh : set_x, set_y, set_z, set_h;
 };
+
+
+dclass DistributedAvatar : DistributedNode {
+  set_name(string) required broadcast ram;
+  set_color(uint8) required broadcast ram ownsend;
+};
+
+
+dclass DistributedDistrict : DistributedObject {
+  set_name(string) required broadcast ram;
+  set_available(uint8) required broadcast ram;
+};
+
 
 dclass AuthMgr : DistributedObject {
   login(string username) clsend;
