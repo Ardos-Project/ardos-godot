@@ -22,7 +22,7 @@ func get_district_name() -> String:
 
 
 func d_set_district_name(district_name: String):
-	self.send_update("set_name", [district_name])
+	self.send_update("set_district_name", [district_name])
 
 
 func b_set_district_name(district_name: String):

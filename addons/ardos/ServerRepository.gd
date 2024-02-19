@@ -16,12 +16,13 @@ var our_channel: int = 0
 var channel_allocator: UniqueIdAllocator = UniqueIdAllocator.new()
 # Configured State Server ID.
 var server_id: int = 0
-# Channel ID of the current message sender.
-var msg_sender: int = 0
 
 # The range of channels this AI controls.
 var _min_channel: int = 0
 var _max_channel: int = 0
+
+# Channel ID of the current message sender.
+var _msg_sender: int = 0
 
 # Channels this server has opened for receiving messages from the Message Director.
 var _open_channels: Array = []
@@ -119,6 +120,18 @@ func set_ai(do_id: int, ai_channel: int):
 	self.send(dg)
 
 
+## Declares the specified DistributedObject to be a "session object",
+## meaning that it is destroyed when the client disconnects.
+## Generally used for avatars owned by the client.
+func client_add_session_object(client_channel: int, do_id: int):
+	var dg: Datagram = Datagram.new()
+	dg.add_server_header(
+		client_channel, self.our_channel, MessageTypes.CLIENTAGENT_ADD_SESSION_OBJECT
+	)
+	dg.add_uint32(do_id)
+	self.send(dg)
+
+
 ## Generate an object onto the State Server, choosing an ID from the pool.
 ## You should use do.generate_with_required(...) instead. This is not meant
 ## to be called directly unless you really know what you are doing.
@@ -136,6 +149,11 @@ func generate_with_required_and_id(
 	do.do_id = do_id
 	self.collection_manager.add_do_to_tables(do, parent_id, zone_id)
 	self._send_generate_with_required(do, parent_id, zone_id)
+
+
+## Returns the channel ID of the current message sender.
+func get_msg_sender() -> int:
+	return self._msg_sender
 
 
 ##
@@ -157,7 +175,7 @@ func _handle_datagram(di: DatagramIterator) -> void:
 	# Discard target channels, we don't need them.
 	di.seek_payload()
 
-	self.msg_sender = di.get_uint64()
+	self._msg_sender = di.get_uint64()
 
 	var msg_type: int = di.get_uint16()
 	if (

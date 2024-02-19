@@ -16,10 +16,10 @@ func _handle_connected():
 	super._handle_connected()
 
 	self._create_globals()
-	
+
 	_connectingContainer.visible = false
 	_pickNameContainer.visible = true
-	
+
 	_submitNameButton.pressed.connect(self._submit_username)
 
 
@@ -32,7 +32,7 @@ func _create_globals():
 func _submit_username():
 	if not _usernameInput.text:
 		return
-		
+
 	_submitNameButton.disabled = true
-	
+
 	auth_mgr.login(_usernameInput.text)
