@@ -40,11 +40,15 @@ var interest_manager: DoInterestManager = DoInterestManager.new()
 
 var _socket: StreamPeerTCP = StreamPeerTCP.new()
 var _last_status: StreamPeerTCP.Status = StreamPeerTCP.STATUS_NONE
+var _data_buf: PackedByteArray = PackedByteArray()
+
 var _dc_file: GDDCFile = GDDCFile.new()
 var _dc_imports: Dictionary = {}
 var _dclasses_by_name: Dictionary = {}
 var _dclasses_by_number: Dictionary = {}
-var _data_buf: PackedByteArray = PackedByteArray()
+
+##
+var _game_globals_id: int = 0
 
 
 ##
@@ -70,6 +74,15 @@ func _handle_disconnected() -> void:
 ## Inheritors should override.
 func _handle_datagram(di: DatagramIterator) -> void:
 	pass
+
+
+func set_game_do_id(id: int) -> void:
+	self._game_globals_id = id
+	self.collection_manager.GAME_GLOBALS_ID = id
+
+
+func get_game_do_id() -> int:
+	return self._game_globals_id
 
 
 ##

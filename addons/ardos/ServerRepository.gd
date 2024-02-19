@@ -71,7 +71,7 @@ func allocate_channel() -> int:
 
 ## Return a previously-allocated channel back to the allocation pool.
 func deallocate_channel(channel: int) -> void:
-	self.channel_allocator.free(channel)
+	self.channel_allocator.free_id(channel)
 
 
 ## Register for messages on a specific Message Director channel.

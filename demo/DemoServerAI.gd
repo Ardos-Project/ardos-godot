@@ -16,6 +16,8 @@ func _init(
 ):
 	super._init(dc_file_names, suffix, min_channel, max_channel, stateserver_id)
 
+	self.set_game_do_id(4619)
+
 	self.district_name = district_name
 
 
@@ -31,8 +33,10 @@ func _handle_connected():
 	# Clients will automatically discover these by setting interest
 	# in the "management" zone.
 	self._district = DistributedDistrictAI.new()
-	self._district.set_name(self.district_name)
-	self._district.generate_with_required_and_id(self.district_id)
+	self._district.set_district_name(self.district_name)
+	self._district.generate_with_required_and_id(self.district_id, self.get_game_do_id(), 2)
+	self._district.set_ai(self.our_channel)
+
 	self._district.b_set_available(1)
 
 	print("District '%s' online!" % self.district_name)
