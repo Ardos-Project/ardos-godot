@@ -15,6 +15,10 @@ var zone_id: int = 0
 var __generated: bool = false
 
 
+func _init(repo: ConnectionRepository):
+	self.repository = repo
+
+
 ## First generate (not from cache).
 func generate_init():
 	pass

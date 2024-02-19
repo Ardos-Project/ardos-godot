@@ -10,6 +10,19 @@ var air: ServerRepository:
 var do_not_dealloc_channel: bool = false
 
 
+func _init(repo: ConnectionRepository):
+	super._init(repo)
+
+	self.dclass = self.air._dclasses_by_name[self.get_dc_name()]
+
+
+## We have to do this terribleness becase Godot doesn't have a method of getting
+## the `class_name` attribute. `get_class` will only return the native class
+## that this one extends (Node).
+func get_dc_name() -> String:
+	return "DistributedObjectAI"
+
+
 ## Inheritors should redefine this to take appropriate action on delete.
 func delete():
 	super.delete()

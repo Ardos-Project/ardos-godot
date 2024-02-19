@@ -20,7 +20,9 @@ func _ready():
 		if "--ud" in OS.get_cmdline_user_args():
 			var _cls = load("res://demo/DemoServerUD.gd")
 
-			var _ud = _cls.new(DC_FILES, "UD", base_channel, base_channel + channel_alloc)
+			var _ud = _cls.new(
+				DC_FILES, "UD", base_channel, base_channel + channel_alloc, stateserver_id
+			)
 			_ud.name = "DemoServerUD"
 			add_child(_ud)
 

@@ -6,6 +6,10 @@ var air: ServerRepository:
 		return self.repository
 
 
+func _init(repo: ConnectionRepository):
+	super._init(repo)
+
+
 func send_update(field_name: String, args: Array = []):
 	var _dg: Datagram = self.dclass.ai_format_update(
 		field_name, self.do_id, self.do_id, self.air.our_channel, args

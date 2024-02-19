@@ -4,6 +4,10 @@ var _district_name: String = ""
 var _available: bool = false
 
 
+func get_dc_name() -> String:
+	return "DistributedDistrictAI"
+
+
 func delete():
 	self.b_set_available(0)
 	super.delete()

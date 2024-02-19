@@ -7,9 +7,10 @@ func _init(
 	dc_file_names: PackedStringArray = [],
 	suffix: String = "",
 	min_channel: int = 0,
-	max_channel: int = 0
+	max_channel: int = 0,
+	stateserver_id: int = 0
 ):
-	super._init(dc_file_names, suffix, min_channel, max_channel)
+	super._init(dc_file_names, suffix, min_channel, max_channel, stateserver_id)
 
 	self.set_game_do_id(4619)
 
@@ -22,7 +23,7 @@ func _handle_connected():
 
 	# Root parent object for all AI distributed objects.
 	# Generated with the fairies game id.
-	var root_obj: DistributedObjectAI = DistributedObjectAI.new()
+	var root_obj: DistributedDirectoryAI = DistributedDirectoryAI.new(self)
 	root_obj.generate_with_required_and_id(self.get_game_do_id(), 0, 0)
 
 	self._create_globals()

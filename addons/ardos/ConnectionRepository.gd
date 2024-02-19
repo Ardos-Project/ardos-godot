@@ -131,8 +131,7 @@ func generate_global_object(do_id: int, dc_name: String) -> DistributedObjectBas
 		print("[ConnectionRepository] ERROR: Could not construct an undefined %s" % dclass_name)
 		return
 
-	var dist_obj: DistributedObjectBase = class_def.new()
-	dist_obj.repository = self
+	var dist_obj: DistributedObjectBase = class_def.new(self)
 	dist_obj.dclass = dclass
 	dist_obj.do_id = do_id
 	dist_obj.parent_id = 0

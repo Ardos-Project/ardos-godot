@@ -1,4 +1,5 @@
 from addons.ardos import DistributedObject/AI/UD
+from addons.ardos import DistributedDirectory/AI
 from addons.ardos import DistributedNode/AI
 from demo.distributed import DistributedAvatar/AI
 from demo.distributed import DistributedDistrict/AI
@@ -7,6 +8,14 @@ from demo.distributed import AuthMgr/UD
 
 // The most fundamental class
 dclass DistributedObject {
+};
+
+
+// Generic named container.  Intended to be a parent for
+// other objects, somewhat like a directory in a file system.
+// This object has no attributes and none of them get created, but it
+// is still needed. It is used as a parent for the individual games.
+dclass DistributedDirectory : DistributedObject {
 };
 
 

@@ -32,7 +32,7 @@ func _handle_connected():
 	# Generate the distributed object to represent this district.
 	# Clients will automatically discover these by setting interest
 	# in the "management" zone.
-	self._district = DistributedDistrictAI.new()
+	self._district = DistributedDistrictAI.new(self)
 	self._district.set_district_name(self.district_name)
 	self._district.generate_with_required_and_id(self.district_id, self.get_game_do_id(), 2)
 	self._district.set_ai(self.our_channel)
