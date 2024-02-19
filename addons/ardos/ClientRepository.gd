@@ -37,6 +37,69 @@ func connect_to_server(host: String, port: int, version: String) -> void:
 	super._connect_to_server(host, port)
 
 
+## Look into a (set of) zone(s).
+func add_interest(
+	parent_id: int, zone_ids: Array, description: String, callback: Callable = Callable()
+) -> DoInterestHandle:
+	var handle: int = self.interest_manager._get_next_handle()
+
+	# Make sure we can see the parent object.
+	if parent_id != self.get_game_do_id():
+		var parent: DistributedObject = self.collection_manager.get_do(parent_id)
+		if not parent:
+			assert(
+				false,
+				"add_interest: attempting to add interest under unknown object %d" % parent_id
+			)
+			return null
+
+	var context_id: int
+	if callback.is_valid():
+		context_id = self.interest_manager._get_next_context()
+	else:
+		context_id = 0
+
+	self.interest_manager._interests[handle] = DoInterestState.new(
+		description, DoInterestState.State.StateActive, context_id, callback, parent_id, zone_ids
+	)
+
+	self._send_add_interest(handle, context_id, parent_id, zone_ids, description)
+
+	return DoInterestHandle.new(handle)
+
+
+## Stop looking in a (set of) zone(s)
+func remove_interest(handle: DoInterestHandle, callback: Callable = Callable()) -> bool:
+	var existed: bool = false
+
+	var handle_id: int = handle.get_handle()
+	if self.interest_manager._interests.has(handle_id):
+		existed = true
+		var state: DoInterestState = self.interest_manager._interests[handle_id]
+
+		if state.is_pending_delete():
+			print(
+				(
+					"[ClientRepository] WARNING: remove_interest: interest %d already pending removal"
+					% handle_id
+				)
+			)
+		else:
+			state._state = DoInterestState.State.StatePendingDel
+			var context_id: int = self.interest_manager._get_next_context()
+			state._context = context_id
+			state._callback = callback
+
+			self._send_remove_interest(handle_id, context_id)
+
+			if not callback.is_valid():
+				self.interest_manager._consider_remove_interest(handle_id)
+	else:
+		print("[ClientRepository] WARNING: remove_interest: handle not found: %d" % handle_id)
+
+	return existed
+
+
 func _handle_connected():
 	# Send a hello packet to start the auth process.
 	var _dg: Datagram = Datagram.new()
@@ -89,6 +152,41 @@ func _send_heartbeat() -> void:
 	# Send off a heartbeat message.
 	var _dg: Datagram = Datagram.new()
 	_dg.add_uint16(MessageTypes.CLIENT_HEARTBEAT)
+	self.send(_dg)
+
+
+## handle is a client-side created number that refers to
+## a set of interests. The same handle number doesn't
+## necessarily have any relationship to the same handle
+## on another client.
+func _send_add_interest(
+	handle: int, context_id: int, parent_id: int, zone_ids: Array, description: String
+) -> void:
+	var _dg: Datagram = Datagram.new()
+
+	if zone_ids.size() > 1:
+		_dg.add_uint16(MessageTypes.CLIENT_ADD_INTEREST_MULTIPLE)
+		_dg.add_uint32(context_id)
+		_dg.add_uint16(handle)
+		_dg.add_uint32(parent_id)
+		_dg.add_uint16(zone_ids.size())
+		for zone in zone_ids:
+			_dg.add_uint32(zone)
+	else:
+		_dg.add_uint16(MessageTypes.CLIENT_ADD_INTEREST)
+		_dg.add_uint32(context_id)
+		_dg.add_uint16(handle)
+		_dg.add_uint32(parent_id)
+		_dg.add_uint32(zone_ids[0])
+
+	self.send(_dg)
+
+
+func _send_remove_interest(handle: int, context_id: int) -> void:
+	var _dg: Datagram = Datagram.new()
+	_dg.add_uint16(MessageTypes.CLIENT_REMOVE_INTEREST)
+	_dg.add_uint32(context_id)
+	_dg.add_uint16(handle)
 	self.send(_dg)
 
 
@@ -235,8 +333,7 @@ func _handle_leaving(di: DatagramIterator, owner: bool = false):
 
 ##
 func _handle_interest_done(di: DatagramIterator):
-	# TODO.
-	pass
+	self.interest_manager._handle_interest_done(di)
 
 
 ##
