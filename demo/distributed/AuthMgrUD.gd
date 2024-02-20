@@ -5,6 +5,10 @@ func login(username: String):
 	print("Hello from client! Username: %s" % username)
 
 	var sender: int = self.air.get_msg_sender()
+	
+	# Allocate a DoId for the players account.
+	# This would usually be resolved via auth.
+	var acc_id: int = self.air.allocate_channel()
 
 	# Allocate a DoId for the players avatar.
 	# This would usually be stored on an account object of some sort.
