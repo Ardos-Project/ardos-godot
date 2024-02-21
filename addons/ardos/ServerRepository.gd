@@ -11,6 +11,10 @@ using Godot. Objects with a "self.air" attribute are referring to an instance
 of this class.
 """
 
+## The different auth states a client can be in.
+## Used in conjuction with `client_set_auth_state()`
+enum ClientAuthState { AUTH_STATE_NEW, AUTH_STATE_ANONYMOUS, AUTH_STATE_ESTABLISHED }
+
 # The channel allocated as this server's sender id.
 var our_channel: int = 0
 var channel_allocator: UniqueIdAllocator = UniqueIdAllocator.new()
@@ -120,6 +124,62 @@ func set_ai(do_id: int, ai_channel: int):
 	self.send(dg)
 
 
+## Eject (kick) a client with a given application-specific code and reason.
+func client_eject(client_channel: int, code: int, reason: String = ""):
+	var dg: Datagram = Datagram.new()
+	dg.add_server_header(client_channel, self.our_channel, MessageTypes.CLIENTAGENT_EJECT)
+	dg.add_uint16(code)
+	dg.add_string(reason)
+	self.send(dg)
+
+
+## Update the auth state of a connected client within the Ardos cluster.
+## Generally, this should only be called with `AUTH_STATE_ESTABLISHED`
+## Ardos automatically handles new and anonymous connections.
+func client_set_auth_state(client_channel: int, state: ClientAuthState):
+	var dg: Datagram = Datagram.new()
+	dg.add_server_header(client_channel, self.our_channel, MessageTypes.CLIENTAGENT_SET_STATE)
+	dg.add_uint16(state)
+	self.send(dg)
+
+
+## Updates the sender channel of the specified client when calling `get_msg_sender()`
+## This is typically used to de-anonymize the client. e.g. Set their sender channel
+## to their application-specific account id, avatar id, etc.
+func client_set_sender_channel(client_channel: int, new_channel: int):
+	var dg: Datagram = Datagram.new()
+	dg.add_server_header(client_channel, self.our_channel, MessageTypes.CLIENTAGENT_SET_CLIENT_ID)
+	dg.add_uint64(new_channel)
+	self.send(dg)
+
+
+## Opens the specified channel on a client for receiving messages.
+func client_open_channel(client_channel: int, channel: int):
+	var dg: Datagram = Datagram.new()
+	dg.add_server_header(client_channel, self.our_channel, MessageTypes.CLIENTAGENT_OPEN_CHANNEL)
+	dg.add_uint64(channel)
+	self.send(dg)
+
+
+## Closes a previously opened channel on a client.
+func client_close_channel(client_channel: int, channel: int):
+	var dg: Datagram = Datagram.new()
+	dg.add_server_header(client_channel, self.our_channel, MessageTypes.CLIENTAGENT_CLOSE_CHANNEL)
+	dg.add_uint64(channel)
+	self.send(dg)
+
+
+## Declares the specified DistributedObject to be "owned" by the specified
+## client channel. This allows the client to call "ownsend" fields, and receive
+## "ownrecv" fields. Depending on your Ardos configuration, they may also be
+## able to change the location of this object.
+func client_add_owner_object(client_channel: int, do_id: int):
+	var dg: Datagram = Datagram.new()
+	dg.add_server_header(do_id, self.our_channel, MessageTypes.STATESERVER_OBJECT_SET_OWNER)
+	dg.add_uint64(client_channel)
+	self.send(dg)
+
+
 ## Declares the specified DistributedObject to be a "session object",
 ## meaning that it is destroyed when the client disconnects.
 ## Generally used for avatars owned by the client.
@@ -127,6 +187,16 @@ func client_add_session_object(client_channel: int, do_id: int):
 	var dg: Datagram = Datagram.new()
 	dg.add_server_header(
 		client_channel, self.our_channel, MessageTypes.CLIENTAGENT_ADD_SESSION_OBJECT
+	)
+	dg.add_uint32(do_id)
+	self.send(dg)
+
+
+## Removes a previously added session object from a client.
+func client_remove_session_object(client_channel: int, do_id: int):
+	var dg: Datagram = Datagram.new()
+	dg.add_server_header(
+		client_channel, self.our_channel, MessageTypes.CLIENTAGENT_REMOVE_SESSION_OBJECT
 	)
 	dg.add_uint32(do_id)
 	self.send(dg)
@@ -154,6 +224,26 @@ func generate_with_required_and_id(
 ## Returns the channel ID of the current message sender.
 func get_msg_sender() -> int:
 	return self._msg_sender
+
+
+## Unique 64-bit channel id for avatars.
+func get_avatar_connection_channel(do_id: int) -> int:
+	return do_id + (1001 << 32)
+
+
+## Unique 64-bit channel id for accounts.
+func get_account_connection_channel(do_id: int) -> int:
+	return do_id + (1003 << 32)
+
+
+## Returns the account id packed into the hi 32-bits of a client channel.
+func get_account_id_from_channel(channel: int) -> int:
+	return channel >> 32
+
+
+## Returns the avatar id packed into the lo 32-bits of a client channel.
+func get_avatar_id_from_channel(channel: int) -> int:
+	return channel & 0xffffffff
 
 
 ##

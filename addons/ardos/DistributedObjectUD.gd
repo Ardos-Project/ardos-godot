@@ -25,3 +25,23 @@ func announce_generate():
 func delete():
 	self.air.unregister_for_channel(self.do_id)
 	super.delete()
+
+
+## Unique 64-bit channel id for avatars.
+func get_avatar_connection_channel(do_id: int) -> int:
+	return self.air.get_avatar_connection_channel(do_id)
+
+
+## Unique 64-bit channel id for accounts.
+func get_account_connection_channel(do_id: int) -> int:
+	return self.air.get_account_connection_channel(do_id)
+
+
+## Returns the account id packed into the hi 32-bits of a client channel.
+func get_account_id_from_channel(channel: int) -> int:
+	return self.air.get_account_id_from_channel(channel)
+
+
+## Returns the avatar id packed into the lo 32-bits of a client channel.
+func get_avatar_id_from_channel(channel: int) -> int:
+	return self.air.get_avatar_id_from_channel(channel)
