@@ -205,20 +205,26 @@ func client_remove_session_object(client_channel: int, do_id: int):
 ## Generate an object onto the State Server, choosing an ID from the pool.
 ## You should use do.generate_with_required(...) instead. This is not meant
 ## to be called directly unless you really know what you are doing.
-func generate_with_required(do: DistributedObjectAI, parent_id: int, zone_id: int):
+func generate_with_required(
+	do: DistributedObjectAI, parent_id: int, zone_id: int, optional_fields: PackedStringArray
+):
 	var do_id: int = self.allocate_channel()
-	self.generate_with_required_and_id(do, do_id, parent_id, zone_id)
+	self.generate_with_required_and_id(do, do_id, parent_id, zone_id, optional_fields)
 
 
 ## Generate an object onto the State Server, specifying its ID and location.
 ## You should use do.generate_with_required_and_id(...) instead. This is not
 ## meant to be called directly unless you really know what you are doing.
 func generate_with_required_and_id(
-	do: DistributedObjectAI, do_id: int, parent_id: int, zone_id: int
+	do: DistributedObjectAI,
+	do_id: int,
+	parent_id: int,
+	zone_id: int,
+	optional_fields: PackedStringArray
 ):
 	do.do_id = do_id
 	self.collection_manager.add_do_to_tables(do, parent_id, zone_id)
-	self._send_generate_with_required(do, parent_id, zone_id)
+	self._send_generate_with_required(do, parent_id, zone_id, optional_fields)
 
 
 ## Returns the channel ID of the current message sender.
@@ -253,9 +259,11 @@ func _handle_connected():
 
 
 ##
-func _send_generate_with_required(do: DistributedObjectAI, parent_id: int, zone_id: int):
+func _send_generate_with_required(
+	do: DistributedObjectAI, parent_id: int, zone_id: int, optional_fields: PackedStringArray
+):
 	var dg: Datagram = do.dclass.ai_format_generate(
-		do, do.do_id, parent_id, zone_id, self.server_id, self.our_channel
+		do, do.do_id, parent_id, zone_id, self.server_id, self.our_channel, optional_fields
 	)
 	self.send(dg)
 

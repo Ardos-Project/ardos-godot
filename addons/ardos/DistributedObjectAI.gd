@@ -48,15 +48,19 @@ func set_ai(ai_channel: int):
 
 
 ## Generate an object onto the State Server, choosing an ID from the pool.
-func generate_with_required(parent_id: int, zone_id: int):
-	self.air.generate_with_required(self, parent_id, zone_id)
+## An array of optional field names (non-required) can be included to set on the server.
+func generate_with_required(parent_id: int, zone_id: int, optional_fields: PackedStringArray = []):
+	self.air.generate_with_required(self, parent_id, zone_id, optional_fields)
 	self.generate()
 	self.announce_generate()
 
 
 ## Generate an object onto the State Server, specifying its ID and location.
-func generate_with_required_and_id(do_id: int, parent_id: int, zone_id: int):
-	self.air.generate_with_required_and_id(self, do_id, parent_id, zone_id)
+## An array of optional field names (non-required) can be included to set on the server.
+func generate_with_required_and_id(
+	do_id: int, parent_id: int, zone_id: int, optional_fields: PackedStringArray = []
+):
+	self.air.generate_with_required_and_id(self, do_id, parent_id, zone_id, optional_fields)
 	self.generate()
 	self.announce_generate()
 
