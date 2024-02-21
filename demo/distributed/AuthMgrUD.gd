@@ -37,7 +37,11 @@ func login(username: String):
 	# perspective of Ardos, they are now fully privileged within the cluster.
 	self.air.client_set_auth_state(sender, ServerRepository.ClientAuthState.AUTH_STATE_ESTABLISHED)
 
+	# Generate the DistributedAvatarAI object for this client.
 	var av: DistributedAvatarAI = DistributedAvatarAI.new(self.air)
+	av.set_avatar_name(username)
+	av.set_color(0)
+	av.generate_with_required_and_id(av_id, 0, 0)
 
 	# Instruct the client to start receiving messages that are sent to their avatar channel.
 	self.air.client_open_channel(sender, self.get_avatar_connection_channel(av_id))
