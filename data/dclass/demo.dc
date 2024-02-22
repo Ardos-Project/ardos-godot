@@ -1,7 +1,7 @@
 from addons.ardos import DistributedObject/AI/UD
 from addons.ardos import DistributedDirectory/AI
 from addons.ardos import DistributedNode/AI
-from demo.distributed import DistributedAvatar/AI
+from demo.distributed import DistributedAvatar/AI/OV
 from demo.distributed import DistributedDistrict/AI
 from demo.distributed import AuthMgr/UD
 

@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://b8d3mfo1ysovh"]
+
+[ext_resource type="PackedScene" uid="uid://di85am7uje41w" path="res://demo/models/mixamo_base.glb" id="1_8lh8u"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_3rvhu"]
+radius = 0.3
+
+[node name="Avatar" type="CharacterBody3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CylinderShape3D_3rvhu")
+
+[node name="Visuals" type="Node3D" parent="."]
+
+[node name="Username" type="Label3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.02417, 0)
+billboard = 2
+text = "Username"
+
+[node name="mixamo_base" parent="Visuals" instance=ExtResource("1_8lh8u")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)

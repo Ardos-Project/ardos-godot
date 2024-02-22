@@ -1,9 +1,9 @@
 class_name DemoClient extends ClientRepository
 
-@onready var _connectingContainer = get_node("/root/Node3D/UI/ConnectingContainer")
-@onready var _pickNameContainer = get_node("/root/Node3D/UI/PickNameContainer")
-@onready var _submitNameButton = get_node("/root/Node3D/UI/PickNameContainer/VBoxContainer/Button")
-@onready var _usernameInput = get_node("/root/Node3D/UI/PickNameContainer/VBoxContainer/LineEdit")
+@onready var _connectingContainer = get_node("/root/Root/UI/ConnectingContainer")
+@onready var _pickNameContainer = get_node("/root/Root/UI/PickNameContainer")
+@onready var _submitNameButton = get_node("/root/Root/UI/PickNameContainer/VBoxContainer/Button")
+@onready var _usernameInput = get_node("/root/Root/UI/PickNameContainer/VBoxContainer/LineEdit")
 
 var auth_mgr: AuthMgr = null
 
