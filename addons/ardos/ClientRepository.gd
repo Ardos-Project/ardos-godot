@@ -132,8 +132,10 @@ func _handle_datagram(di: DatagramIterator):
 		self._handle_generate_with_required(di)
 	elif msg_type == MessageTypes.CLIENT_ENTER_OBJECT_REQUIRED_OTHER:
 		self._handle_generate_with_required(di, true)
-	elif msg_type == MessageTypes.CLIENT_ENTER_OBJECT_REQUIRED_OTHER_OWNER:
+	elif msg_type == MessageTypes.CLIENT_ENTER_OBJECT_REQUIRED_OWNER:
 		self._handle_generate_with_required_other_owner(di)
+	elif msg_type == MessageTypes.CLIENT_ENTER_OBJECT_REQUIRED_OTHER_OWNER:
+		self._handle_generate_with_required_other_owner(di, true)
 	elif msg_type == MessageTypes.CLIENT_OBJECT_SET_FIELD:
 		self._handle_set_field(di)
 	elif msg_type == MessageTypes.CLIENT_OBJECT_LEAVING:
@@ -232,15 +234,13 @@ func _handle_generate_with_required(di: DatagramIterator, other: bool = false):
 		dist_obj.generate_init()  # Only called when constructed.
 		dist_obj.generate()
 		if other:
-			dist_obj.update_all_required_other_fields(di)
+			dist_obj.update_all_required_fields_other(di)
 		else:
 			dist_obj.update_all_required_fields(di)
-
 		add_child(dist_obj)
-		dist_obj.announce_generate()
 
 
-func _handle_generate_with_required_other_owner(di: DatagramIterator):
+func _handle_generate_with_required_other_owner(di: DatagramIterator, other: bool = false):
 	var do_id: int = di.get_uint32()
 	var parent_id: int = di.get_uint32()
 	var zone_id: int = di.get_uint32()
@@ -267,7 +267,7 @@ func _handle_generate_with_required_other_owner(di: DatagramIterator):
 	else:
 		# ...it is not in the dictionary or the cache.
 		# Construct a new one.
-		var dist_obj: DistributedObject = class_def.new()
+		var dist_obj: DistributedObjectOV = class_def.new()
 		dist_obj.repository = self
 		dist_obj.dclass = dclass
 		dist_obj.do_id = do_id
@@ -277,10 +277,11 @@ func _handle_generate_with_required_other_owner(di: DatagramIterator):
 		# Now for generation:
 		dist_obj.generate_init()  # Only called when constructed.
 		dist_obj.generate()
-		dist_obj.update_all_required_other_fields(di)
-
+		if other:
+			dist_obj.update_required_fields_other(di)
+		else:
+			dist_obj.update_required_fields(di)
 		add_child(dist_obj)
-		dist_obj.announce_generate()
 
 
 ##
@@ -290,11 +291,9 @@ func _handle_set_field(di: DatagramIterator):
 	# First, try to update an OV we might have on this object.
 	var do_ov: DistributedObject = self.collection_manager.get_do_ov(do_id)
 	if do_ov:
-		# Decode the field update data.
-		var data: Array = do_ov.dclass.receive_update(di)
-		if len(data) != 0:
-			var callable: Callable = Callable(do_ov, data.pop_front())
-			callable.callv(data)
+		# Receive the update on the owner object.
+		# This will automatically call the method packed in the update.
+		do_ov.dclass.receive_update(do_ov, di)
 
 		# Reset the datagram iterator for receive_update again below.
 		di.seek_payload()
@@ -303,11 +302,9 @@ func _handle_set_field(di: DatagramIterator):
 	# Next, try to update a client view we might have on this object.
 	var do: DistributedObject = self.collection_manager.get_do(do_id)
 	if do:
-		# Decode the field update data.
-		var data: Array = do.dclass.receive_update(di)
-		if len(data) != 0:
-			var callable: Callable = Callable(do, data.pop_front())
-			callable.callv(data)
+		# Receive the update on the object.
+		# This will automatically call the method packed in the update.
+		do.dclass.receive_update(do, di)
 
 
 ##

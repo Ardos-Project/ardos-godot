@@ -360,12 +360,10 @@ func _handle_obj_entry(di: DatagramIterator, other: bool) -> void:
 	# Now for generation:
 	dist_obj.generate()
 	if other:
-		dist_obj.update_all_required_other_fields(di)
+		dist_obj.update_all_required_fields_other(di)
 	else:
 		dist_obj.update_all_required_fields(di)
-
 	add_child(dist_obj)
-	dist_obj.announce_generate()
 
 
 ##
@@ -392,12 +390,9 @@ func _handle_set_field(di: DatagramIterator):
 	if not do:
 		return
 
-	var data: Array = do.dclass.receive_update(di)
-	if len(data) == 0:
-		return
-
-	var callable: Callable = Callable(do, data.pop_front())
-	callable.callv(data)
+	# Receive the update on the object.
+	# This will automatically call the method packed in the update.
+	do.dclass.receive_update(do, di)
 
 
 ##

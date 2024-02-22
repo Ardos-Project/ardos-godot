@@ -69,3 +69,35 @@ func handle_child_leave(child_obj: DistributedObjectBase, zone_id: int):
 ## location to that zone.
 func handle_child_leave_zone(child_obj: DistributedObjectBase, zone_id: int):
 	pass
+
+
+##
+func update_required_fields(di: DatagramIterator):
+	self.dclass.receive_update_broadcast_required(self, di)
+	self.announce_generate()
+
+
+##
+func update_all_required_fields(di: DatagramIterator):
+	self.dclass.receive_update_all_required(self, di)
+	self.announce_generate()
+
+
+##
+func update_required_fields_other(di: DatagramIterator):
+	self.dclass.receive_update_broadcast_required(self, di)
+	# Announce generate after updating all the required fields,
+	# but before we update the non-required fields.
+	self.announce_generate()
+
+	self.dclass.receive_update_other(self, di)
+
+
+##
+func update_all_required_fields_other(di: DatagramIterator):
+	self.dclass.receive_update_all_required(self, di)
+	# Announce generate after updating all the required fields,
+	# but before we update the non-required fields.
+	self.announce_generate()
+
+	self.dclass.receive_update_other(self, di)
