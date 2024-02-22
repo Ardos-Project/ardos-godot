@@ -234,9 +234,9 @@ func _handle_generate_with_required(di: DatagramIterator, other: bool = false):
 		dist_obj.generate_init()  # Only called when constructed.
 		dist_obj.generate()
 		if other:
-			dist_obj.update_all_required_fields_other(di)
+			dist_obj.update_required_fields_other(di)
 		else:
-			dist_obj.update_all_required_fields(di)
+			dist_obj.update_required_fields(di)
 		add_child(dist_obj)
 
 
@@ -259,7 +259,7 @@ func _handle_generate_with_required_other_owner(di: DatagramIterator, other: boo
 		# ...it is in our dictionary.
 		# Just update it.
 		assert(false, "Duplicate owner generate for %d (%s)" % [do_id, dclass_name])
-		var dist_obj: DistributedObject = self.collection_manager.get_do_ov(do_id)
+		var dist_obj: DistributedObjectOV = self.collection_manager.get_do_ov(do_id)
 		dist_obj.generate()
 		dist_obj.update_required_fields_other(di)
 	# TODO: Cacheable objects.
