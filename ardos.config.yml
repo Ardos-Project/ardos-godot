@@ -32,29 +32,29 @@ uberdogs:
 # Metrics (Prometheus) configuration.
 # This should be configured as a target in your Prometheus config.
 metrics:
-  host: 127.0.0.1
+  host: 0.0.0.0
   port: 9985
 
 # Message Director configuration.
 message-director:
   # Listen configuration.
-  host: 127.0.0.1
+  host: 0.0.0.0
   port: 7199
 
   # RabbitMQ configuration.
-  rabbitmq-host: 127.0.0.1
+  rabbitmq-host: demo-md
   rabbitmq-port: 5672
   rabbitmq-user: guest
   rabbitmq-password: guest
 
 # State Server configuration.
 state-server:
-  channel: 1000
+  channel: 1001
 
 # Client Agent configuration.
 client-agent:
   # Listen configuration.
-  host: 127.0.0.1
+  host: 0.0.0.0
   port: 6667
 
   # The logical version of the server.
@@ -83,7 +83,7 @@ database-server:
   channel: 4003
 
   # MongoDB configuration.
-  mongodb-uri: mongodb://localhost:27017/ardos
+  mongodb-uri: mongodb://demo-db:27017/ardos
 
   # The range of DoId's this database server can allocate.
   generate:
