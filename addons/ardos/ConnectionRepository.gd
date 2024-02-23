@@ -222,7 +222,7 @@ func read_dc_file(file_names: PackedStringArray = []) -> void:
 			self._dclasses_by_number[number] = dclass
 
 	# Owner views.
-	if owner_views:
+	if self.owner_views:
 		var owner_dc_suffix = dc_suffix + "OV"
 		# dict of class names (without 'OV') that have owner views.
 		var owner_import_symbols: Dictionary = {}
@@ -243,7 +243,7 @@ func read_dc_file(file_names: PackedStringArray = []) -> void:
 				suffixes = suffixes.slice(1, suffixes.size())
 
 				if suffixes.has(owner_dc_suffix):
-					symbol_name += dc_suffix
+					symbol_name += owner_dc_suffix
 
 				import_symbols.append(symbol_name)
 				owner_import_symbols[symbol_name] = null

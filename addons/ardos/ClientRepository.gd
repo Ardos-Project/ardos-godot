@@ -223,8 +223,7 @@ func _handle_generate_with_required(di: DatagramIterator, other: bool = false):
 	else:
 		# ...it is not in the dictionary or the cache.
 		# Construct a new one.
-		var dist_obj: DistributedObject = class_def.new()
-		dist_obj.repository = self
+		var dist_obj: DistributedObject = class_def.new(self)
 		dist_obj.dclass = dclass
 		dist_obj.do_id = do_id
 		dist_obj.name = "%d - %s" % [do_id, dclass_name]
@@ -267,8 +266,7 @@ func _handle_generate_with_required_other_owner(di: DatagramIterator, other: boo
 	else:
 		# ...it is not in the dictionary or the cache.
 		# Construct a new one.
-		var dist_obj: DistributedObjectOV = class_def.new()
-		dist_obj.repository = self
+		var dist_obj: DistributedObjectOV = class_def.new(self)
 		dist_obj.dclass = dclass
 		dist_obj.do_id = do_id
 		dist_obj.name = "[Owner] %d - %s" % [do_id, dclass_name]
