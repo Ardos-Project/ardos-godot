@@ -101,3 +101,19 @@ func update_all_required_fields_other(di: DatagramIterator):
 	self.announce_generate()
 
 	self.dclass.receive_update_other(self, di)
+
+
+##
+func update_required_fields_owner(di: DatagramIterator):
+	self.dclass.receive_update_broadcast_required_owner(self, di)
+	self.announce_generate()
+
+
+##
+func update_required_fields_other_owner(di: DatagramIterator):
+	self.dclass.receive_update_broadcast_required_owner(self, di)
+	# Announce generate after updating all the required fields,
+	# but before we update the non-required fields.
+	self.announce_generate()
+
+	self.dclass.receive_update_other(self, di)

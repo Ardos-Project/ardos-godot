@@ -7,6 +7,8 @@ var _color: int = 0
 
 
 func _ready():
+	super._ready()
+
 	self.node.add_child(_avatar_model)
 
 
