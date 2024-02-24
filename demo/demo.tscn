@@ -112,7 +112,7 @@ grow_vertical = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 size = Vector3(250, 1, 250)
 
-[node name="LocalCamera" type="Node3D" parent="."]
+[node name="LocalCamera" type="Node3D" parent="." groups=["local_camera"]]
 
 [node name="Camera3D" type="Camera3D" parent="LocalCamera"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 45.2579, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.13571, 12.0283)
