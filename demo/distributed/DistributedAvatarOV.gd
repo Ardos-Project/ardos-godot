@@ -1,5 +1,10 @@
 class_name DistributedAvatarOV extends DistributedAvatar
 
+"""
+Owner view of a DistributedAvatar which implements camera controls and
+movement input.
+"""
+
 @onready var _pickNameContainer = get_node("/root/Root/UI/PickNameContainer")
 
 
