@@ -42,6 +42,12 @@ func delete():
 	self.__generated = false
 
 
+## Returns true if this object been generated and all of its required fields
+## have been set.
+func is_generated() -> bool:
+	return self.__generated
+
+
 ## A new child has just setLocation beneath us. Give us a
 ## chance to run code when a new child sets location to us. For
 ## example, we may want to scene graph reparent the child to
