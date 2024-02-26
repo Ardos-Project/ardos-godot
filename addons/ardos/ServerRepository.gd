@@ -259,6 +259,12 @@ func _handle_connected():
 
 
 ##
+func _handle_disconnected():
+	print("Disconnected from Ardos. Shutting down...")
+	get_tree().quit()
+
+
+##
 func _send_generate_with_required(
 	do: DistributedObjectAI, parent_id: int, zone_id: int, optional_fields: PackedStringArray
 ):
