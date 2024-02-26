@@ -1,4 +1,4 @@
-class_name DistributedAvatarAI extends DistributedNodeAI
+class_name DistributedAvatarAI extends DistributedSmoothNodeAI
 
 var _avatar_name: String = ""
 

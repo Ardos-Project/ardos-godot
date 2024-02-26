@@ -1,12 +1,13 @@
 from addons.ardos import DistributedObject/AI/UD
 from addons.ardos import DistributedDirectory/AI
 from addons.ardos import DistributedNode/AI
+from addons.ardos import DistributedSmoothNode/AI
 from demo.distributed import DistributedAvatar/AI/OV
 from demo.distributed import DistributedDistrict/AI
 from demo.distributed import AuthMgr/UD
 
 
-// The most fundamental class
+// The most fundamental class.
 dclass DistributedObject {
 };
 
@@ -19,13 +20,20 @@ dclass DistributedDirectory : DistributedObject {
 };
 
 
+// A DistributedObject that has a position within 3D space.
 dclass DistributedNode : DistributedObject {
+  // 3D planar coordinates.
   set_x(int16/10) broadcast ram ownsend airecv;
   set_y(int16/10) broadcast ram ownsend airecv;
   set_z(int16/10) broadcast ram ownsend airecv;
+
+  // Heading (H)
   set_h(int16%360/10) broadcast ram ownsend airecv;
+  // Pitch (P)
   set_p(int16%360/10) broadcast ram ownsend airecv;
+  // Roll (R)
   set_r(int16%360/10) broadcast ram ownsend airecv;
+
   set_pos : set_x, set_y, set_z;
   set_hpr : set_h, set_p, set_r;
   set_pos_hpr : set_x, set_y, set_z, set_h, set_p, set_r;
@@ -36,7 +44,18 @@ dclass DistributedNode : DistributedObject {
 };
 
 
-dclass DistributedAvatar : DistributedNode {
+// A DistributedNode that needs to have its position lerped (smoothed) over time.
+// A common use case would be for player-controlled avatars or NPCs.
+dclass DistributedSmoothNode : DistributedNode {
+  set_smooth_x(int16/10) broadcast ram ownsend airecv;
+  set_smooth_y(int16/10) broadcast ram ownsend airecv;
+  set_smooth_z(int16/10) broadcast ram ownsend airecv;
+  
+  set_smooth_pos : set_smooth_x, set_smooth_y, set_smooth_z;
+};
+
+
+dclass DistributedAvatar : DistributedSmoothNode {
   set_avatar_name(string) required broadcast ram;
   set_anim_state(string) broadcast ram ownsend;
 };

@@ -1,4 +1,4 @@
-class_name DistributedAvatar extends DistributedNode
+class_name DistributedAvatar extends DistributedSmoothNode
 
 const AVATAR_INSTANCE = preload("res://demo/avatar.tscn")
 
