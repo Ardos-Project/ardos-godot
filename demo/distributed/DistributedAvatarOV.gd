@@ -27,6 +27,7 @@ func _ready():
 
 	# Reparent the local camera.
 	self._local_camera.reparent(_avatar_node, false)
+	self._local_camera.get_node("Camera3D").position = Vector3(0, 2.276, 3.168)
 
 	# We could do this in AuthMgrUD acceptLogin() function,
 	# but just do it here for simplicity.
@@ -34,6 +35,15 @@ func _ready():
 
 	# Capture the mouse.
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+func d_set_anim_state(state: String):
+	self.send_update("set_anim_state", [state])
+
+
+func b_set_anim_state(state: String):
+	self.set_anim_state(state)
+	self.d_set_anim_state(state)
 
 
 func _input(event):
@@ -64,7 +74,7 @@ func _physics_process(delta):
 
 	if Input.is_action_just_pressed("kick"):
 		if self._avatar_anim.current_animation != "kick":
-			self._avatar_anim.play("kick")
+			self.b_set_anim_state("kick")
 			self._anim_locked = true
 
 	# Handle gravity.
@@ -92,10 +102,10 @@ func _physics_process(delta):
 	)
 	if direction:
 		if not _running and self._avatar_anim.current_animation != "walking":
-			self._avatar_anim.play("walking")
+			self.b_set_anim_state("walking")
 
 		if _running and self._avatar_anim.current_animation != "running":
-			self._avatar_anim.play("running")
+			self.b_set_anim_state("running")
 
 		if !self._anim_locked and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 			self._avatar_node.get_node("Visuals").look_at(self._avatar_node.position + direction)
@@ -104,7 +114,7 @@ func _physics_process(delta):
 		self._avatar_node.velocity.z = direction.z * _cur_speed
 	else:
 		if self._avatar_anim.current_animation != "idle":
-			self._avatar_anim.play("idle")
+			self.b_set_anim_state("idle")
 
 		self._avatar_node.velocity.x = move_toward(self._avatar_node.velocity.x, 0, _cur_speed)
 		self._avatar_node.velocity.z = move_toward(self._avatar_node.velocity.z, 0, _cur_speed)

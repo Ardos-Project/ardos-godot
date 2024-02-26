@@ -38,7 +38,7 @@ dclass DistributedNode : DistributedObject {
 
 dclass DistributedAvatar : DistributedNode {
   set_avatar_name(string) required broadcast ram;
-  set_color(uint8) required broadcast ram ownsend;
+  set_anim_state(string) broadcast ram ownsend;
 };
 
 

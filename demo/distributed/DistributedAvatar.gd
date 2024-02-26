@@ -4,7 +4,6 @@ const AVATAR_INSTANCE = preload("res://demo/avatar.tscn")
 
 var _avatar_node: Node3D = null
 var _avatar_anim: AnimationPlayer = null
-var _color: int = 0
 
 
 func _ready():
@@ -22,5 +21,5 @@ func set_avatar_name(avatar_name: String) -> void:
 	self._avatar_node.get_node("Visuals/Username").text = avatar_name
 
 
-func set_color(color: int):
-	self._color = color
+func set_anim_state(state: String):
+	self._avatar_anim.play(state)
