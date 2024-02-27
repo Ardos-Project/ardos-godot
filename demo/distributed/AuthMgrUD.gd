@@ -40,7 +40,6 @@ func login(username: String):
 	# Generate the DistributedAvatarAI object for this client.
 	var av: DistributedAvatarAI = DistributedAvatarAI.new(self.air)
 	av.set_avatar_name(username)
-	av.set_color(0)
 	av.generate_with_required_and_id(av_id, 0, 0)
 
 	# Instruct the client to start receiving messages that are sent to their avatar channel.

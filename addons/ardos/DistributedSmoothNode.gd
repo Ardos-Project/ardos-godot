@@ -2,6 +2,9 @@ class_name DistributedSmoothNode extends DistributedNode
 
 enum _Flags { NEW_X = 0x01, NEW_Y = 0x02, NEW_Z = 0x04 }
 
+# Target CharacterBody3D to smooth.
+var _target_node: CharacterBody3D = null
+
 var _broadcast_pos: bool = false
 var _broadcast_pos_ival: float = 0.1
 var _broadcast_delta: float = 0.0
@@ -33,6 +36,14 @@ func set_broadcast_pos(enable: bool, interval: float = 0.1):
 ## the current animation rate playing.
 func set_speed(speed: float):
 	self._speed = speed
+
+
+# TODO: This class needs to be more general than just CharacterBodies.
+# We should be able to just access the `self.node` property instead of using it
+# as a container. This will require moving away from `move_and_slide` and doing
+# the lerping/smoothing ourselves.
+func set_target_smooth_node(target: CharacterBody3D):
+	self._target_node = target
 
 
 func set_x(x: float):
@@ -125,7 +136,7 @@ func _has_flag_changed(flags: int, compare: int) -> bool:
 
 ##
 func _send_broadcast_pos():
-	var curr_pos: Vector3 = self.node.get_position()
+	var curr_pos: Vector3 = self._target_node.get_position()
 	var flags: int = 0
 
 	if not is_equal_approx(curr_pos.x, self._last_pos.x):
@@ -146,8 +157,8 @@ func _send_broadcast_pos():
 	# Only Z has changed.
 	elif self._has_flag_changed(flags, _Flags.NEW_Z):
 		self.d_set_smooth_z(curr_pos.z)
-	# Otherwise, send everything.
-	else:
+	# Otherwise, if at least 2 flags have changed, send everything.
+	elif flags != 0:
 		self.d_set_smooth_pos(curr_pos.x, curr_pos.y, curr_pos.z)
 
 	self._last_pos = curr_pos
@@ -155,7 +166,7 @@ func _send_broadcast_pos():
 
 ## We do the actual smoothing logic in the physics process step.
 func _physics_process(delta):
-	if not self.is_generated():
+	if not self.is_generated() or not self._target_node:
 		return
 
 	# If we've enabled position broadcasting, we can assume we have an OV of
@@ -170,15 +181,15 @@ func _physics_process(delta):
 	# Otherwise, this a remote object that has come off of the server.
 	# We can use a combination of the nodes velocity and `move_and_slide()` to lerp.
 	else:
-		var direction: Vector3 = self.node.position.direction_to(_target_pos)
+		var direction: Vector3 = self._target_node.position.direction_to(_target_pos)
 		if not direction.is_zero_approx():
-			self.node.velocity.x = direction.x * self._speed
-			self.node.velocity.y = direction.y * self._speed
-			self.node.velocity.z = direction.z * self._speed
+			self._target_node.velocity.x = direction.x * self._speed
+			self._target_node.velocity.y = direction.y * self._speed
+			self._target_node.velocity.z = direction.z * self._speed
 		else:
-			self.node.velocity.x = move_toward(self.node.velocity.x, 0, self._speed)
-			self.node.velocity.y = move_toward(self.node.velocity.y, 0, self._speed)
-			self.node.velocity.z = move_toward(self.node.velocity.z, 0, self._speed)
+			self._target_node.velocity.x = move_toward(self._target_node.velocity.x, 0, self._speed)
+			self._target_node.velocity.y = move_toward(self._target_node.velocity.y, 0, self._speed)
+			self._target_node.velocity.z = move_toward(self._target_node.velocity.z, 0, self._speed)
 
 	# move_and_slide does the heavy lifting here.
-	self.node.move_and_slide()
+	self._target_node.move_and_slide()

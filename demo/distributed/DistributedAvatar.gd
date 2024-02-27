@@ -9,6 +9,7 @@ var _avatar_anim: AnimationPlayer = null
 func _ready():
 	super._ready()
 
+	self.set_target_smooth_node(_avatar_node)
 	self.node.add_child(_avatar_node)
 
 

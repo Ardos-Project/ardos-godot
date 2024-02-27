@@ -29,6 +29,9 @@ func _ready():
 	self._local_camera.reparent(_avatar_node, false)
 	self._local_camera.get_node("Camera3D").position = Vector3(0, 2.276, 3.168)
 
+	# Start broadcasting our position.
+	self.set_broadcast_pos(true)
+
 	# We could do this in AuthMgrUD acceptLogin() function,
 	# but just do it here for simplicity.
 	self._pick_name_container.visible = false
