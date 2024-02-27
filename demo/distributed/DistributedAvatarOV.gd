@@ -119,4 +119,5 @@ func _physics_process(delta):
 		self._avatar_node.velocity.x = move_toward(self._avatar_node.velocity.x, 0, _cur_speed)
 		self._avatar_node.velocity.z = move_toward(self._avatar_node.velocity.z, 0, _cur_speed)
 
-	self._avatar_node.move_and_slide()
+	# Make sure DistributedSmoothNode gets a chance to broadcast our position.
+	super._physics_process(delta)
