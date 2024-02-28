@@ -22,7 +22,7 @@ func get_district_name() -> String:
 
 
 func d_set_district_name(district_name: String):
-	self.send_update("set_district_name", [district_name])
+	self.send_update("setDistrictName", [district_name])
 
 
 func b_set_district_name(district_name: String):
@@ -39,7 +39,7 @@ func get_available() -> bool:
 
 
 func d_set_available(available: bool):
-	self.send_update("set_available", [available])
+	self.send_update("setAvailable", [available])
 
 
 func b_set_available(available: bool):

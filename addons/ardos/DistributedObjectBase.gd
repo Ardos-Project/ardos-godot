@@ -6,6 +6,10 @@ The Distributed Object class is the base class for all network based
 dclass entry in a *.dc file.
 """
 
+# Used by the dcparser to determine the naming convention for calling fields.
+# C# would redefine this to FIELD_NAME_PASCAL_CASE for example.
+const FIELD_NAME_TYPE = GDDCUtils.FIELD_NAME_SNAKE_CASE
+
 var repository = null
 var dclass: GDDCClass = null
 var do_id: int = 0

@@ -41,7 +41,7 @@ func _ready():
 
 
 func d_set_anim_state(state: String):
-	self.send_update("set_anim_state", [state])
+	self.send_update("setAnimState", [state])
 
 
 func b_set_anim_state(state: String):

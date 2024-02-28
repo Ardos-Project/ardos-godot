@@ -68,7 +68,7 @@ func set_smooth_x(x: float):
 
 ##
 func d_set_smooth_x(x: float):
-	self.send_update("set_smooth_x", [x])
+	self.send_update("setSmoothX", [x])
 
 
 ##
@@ -84,7 +84,7 @@ func set_smooth_y(y: float):
 
 ##
 func d_set_smooth_y(y: float):
-	self.send_update("set_smooth_y", [y])
+	self.send_update("setSmoothY", [y])
 
 
 ##
@@ -100,7 +100,7 @@ func set_smooth_z(z: float):
 
 ##
 func d_set_smooth_z(z: float):
-	self.send_update("set_smooth_z", [z])
+	self.send_update("setSmoothZ", [z])
 
 
 ##
@@ -118,7 +118,7 @@ func set_smooth_pos(x: float, y: float, z: float):
 
 ##
 func d_set_smooth_pos(x: float, y: float, z: float):
-	self.send_update("set_smooth_pos", [x, y, z])
+	self.send_update("setSmoothPos", [x, y, z])
 
 
 ##

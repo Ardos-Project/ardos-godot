@@ -15,7 +15,7 @@ func set_x(x: float):
 
 ##
 func d_set_x(x: float):
-	self.send_update("set_x", [x])
+	self.send_update("setX", [x])
 
 
 ##
@@ -31,7 +31,7 @@ func set_y(y: float):
 
 ##
 func d_set_y(y: float):
-	self.send_update("set_y", [y])
+	self.send_update("setY", [y])
 
 
 ##
@@ -47,7 +47,7 @@ func set_z(z: float):
 
 ##
 func d_set_z(z: float):
-	self.send_update("set_z", [z])
+	self.send_update("setZ", [z])
 
 
 ##
@@ -63,7 +63,7 @@ func set_h(h: float):
 
 ##
 func d_set_h(h: float):
-	self.send_update("set_h", [h])
+	self.send_update("setH", [h])
 
 
 ##
@@ -79,7 +79,7 @@ func set_p(p: float):
 
 ##
 func d_set_p(p: float):
-	self.send_update("set_p", [p])
+	self.send_update("setP", [p])
 
 
 ##
@@ -95,7 +95,7 @@ func set_r(r: float):
 
 ##
 func d_set_r(r: float):
-	self.send_update("set_r", [r])
+	self.send_update("setR", [r])
 
 
 ##
@@ -113,7 +113,7 @@ func set_pos(x: float, y: float, z: float):
 
 ##
 func d_set_pos(x: float, y: float, z: float):
-	self.send_update("set_pos", [x, y, z])
+	self.send_update("setPos", [x, y, z])
 
 
 ##
@@ -131,7 +131,7 @@ func set_hpr(h: float, p: float, r: float):
 
 ##
 func d_set_hpr(h: float, p: float, r: float):
-	self.send_update("set_hpr", [h, p, r])
+	self.send_update("setHpr", [h, p, r])
 
 
 ##
@@ -148,7 +148,7 @@ func set_pos_hpr(x: float, y: float, z: float, h: float, p: float, r: float):
 
 ##
 func d_set_pos_hpr(x: float, y: float, z: float, h: float, p: float, r: float):
-	self.send_update("set_pos_hpr", [x, y, z, h, p, r])
+	self.send_update("setPosHpr", [x, y, z, h, p, r])
 
 
 ##
@@ -165,7 +165,7 @@ func set_xy(x: float, y: float):
 
 ##
 func d_set_xy(x: float, y: float):
-	self.send_update("set_xy", [x, y])
+	self.send_update("setXy", [x, y])
 
 
 ##
@@ -182,7 +182,7 @@ func set_xz(x: float, z: float):
 
 ##
 func d_set_xz(x: float, z: float):
-	self.send_update("set_xz", [x, z])
+	self.send_update("setXz", [x, z])
 
 
 ##
@@ -200,7 +200,7 @@ func set_xyh(x: float, y: float, h: float):
 
 ##
 func d_set_xyh(x: float, y: float, h: float):
-	self.send_update("set_xyh", [x, y, h])
+	self.send_update("setXyh", [x, y, h])
 
 
 ##
@@ -219,7 +219,7 @@ func set_xyzh(x: float, y: float, z: float, h: float):
 
 ##
 func d_set_xyzh(x: float, y: float, z: float, h: float):
-	self.send_update("set_xyzh", [x, y, z, h])
+	self.send_update("setXyzh", [x, y, z, h])
 
 
 ##

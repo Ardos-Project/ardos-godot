@@ -16,7 +16,7 @@ func get_avatar_name() -> String:
 
 
 func d_set_avatar_name(avatar_name: String):
-	self.send_update("set_avatar_name", [avatar_name])
+	self.send_update("setAvatarName", [avatar_name])
 
 
 func b_set_avatar_name(avatar_name: String):
