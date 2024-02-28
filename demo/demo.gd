@@ -16,6 +16,8 @@ func _ready():
 		var stateserver_id: int = int(self._get_cmdline_arg("air-channel-allocation", "1001"))
 		# Fetch the Message Director host address.
 		var md_host: String = self._get_cmdline_arg("air-connect", "127.0.0.1")
+		# Fetch the AI server name.
+		var ai_name: String = self._get_cmdline_arg("district-name", "Demo Shard")
 
 		if "--ud" in OS.get_cmdline_user_args():
 			var _cls = load("res://demo/DemoServerUD.gd")
@@ -32,7 +34,7 @@ func _ready():
 			var _cls = load("res://demo/DemoServerAI.gd")
 
 			var _ai = _cls.new(
-				DC_FILES, "AI", base_channel, base_channel + channel_alloc, stateserver_id
+				DC_FILES, "AI", base_channel, base_channel + channel_alloc, stateserver_id, ai_name
 			)
 			_ai.name = "DemoServerAI"
 			add_child(_ai)

@@ -14,7 +14,6 @@ const RUN_SPEED = 5.0
 const SENS_HORIZONTAL = 0.5
 const SENS_VERTICAL = 0.5
 
-@onready var _pick_name_container = get_node("/root/Root/UI/PickNameContainer")
 @onready var _local_camera = get_tree().get_first_node_in_group("local_camera")
 
 var _cur_speed: float = 0.0
@@ -29,15 +28,14 @@ func _ready():
 	self._local_camera.reparent(_avatar_node, false)
 	self._local_camera.get_node("Camera3D").position = Vector3(0, 2.276, 3.168)
 
-	# Start broadcasting our position.
-	self.set_broadcast_pos(true)
+	DemoClient.local_avatar = self
+	DemoClient.INSTANCE._hanlde_local_av()
 
-	# We could do this in AuthMgrUD acceptLogin() function,
-	# but just do it here for simplicity.
-	self._pick_name_container.visible = false
+	# Start broadcasting our position.
+	#self.set_broadcast_pos(true)
 
 	# Capture the mouse.
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	#Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func d_set_anim_state(state: String):
