@@ -165,6 +165,9 @@ func _store_object_location_table(do: DistributedObjectBase, parent_id: int, zon
 
 ##
 func _delete_object_location_table(do: DistributedObjectBase, parent_id: int, zone_id: int):
+	if not self._is_valid_location(parent_id, zone_id):
+		return
+	
 	var do_id: int = do.do_id
 	if do_id not in self._do_table_ids:
 		assert(
