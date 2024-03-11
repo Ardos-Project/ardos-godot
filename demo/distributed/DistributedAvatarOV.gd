@@ -29,7 +29,7 @@ func _ready():
 	self._local_camera.get_node("Camera3D").position = Vector3(0, 2.276, 3.168)
 
 	DemoClient.local_avatar = self
-	DemoClient.INSTANCE._hanlde_local_av()
+	DemoClient.INSTANCE._handle_local_av()
 
 	# Start broadcasting our position.
 	#self.set_broadcast_pos(true)
