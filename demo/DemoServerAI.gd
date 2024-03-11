@@ -37,6 +37,6 @@ func _handle_connected():
 	self._district.generate_with_required_and_id(self.district_id, self.get_game_do_id(), 2)
 	self._district.set_ai(self.our_channel)
 
-	self._district.b_set_available(1)
+	self._district.b_set_available(true)
 
 	print("District '%s' online!" % self.district_name)

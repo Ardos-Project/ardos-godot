@@ -39,8 +39,8 @@ func add_do_to_tables(
 	do: DistributedObjectBase, parent_id: int = 0, zone_id: int = 0, owner_view: bool = false
 ):
 	if not owner_view:
-		parent_id = parent_id or do.parent_id
-		zone_id = zone_id or do.zone_id
+		parent_id = parent_id if parent_id else do.parent_id
+		zone_id = zone_id if zone_id else do.zone_id
 
 	var do_table: Dictionary = self.do_by_id_ov if owner_view else self.do_by_id
 
@@ -167,7 +167,7 @@ func _store_object_location_table(do: DistributedObjectBase, parent_id: int, zon
 func _delete_object_location_table(do: DistributedObjectBase, parent_id: int, zone_id: int):
 	if not self._is_valid_location(parent_id, zone_id):
 		return
-	
+
 	var do_id: int = do.do_id
 	if do_id not in self._do_table_ids:
 		assert(
